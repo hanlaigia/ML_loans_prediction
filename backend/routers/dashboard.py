@@ -10,3 +10,5 @@ def get_dashboard(month: str = None, year: int = None, db: Session = Depends(get
     data = crud.get_dashboard_data(db, month, year)
     data["model_accuracy"] = 90.14  # cố định
     return data
+
+
