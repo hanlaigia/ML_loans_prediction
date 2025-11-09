@@ -131,6 +131,24 @@ export default function LoanPredictFullUI() {
     }
   }, [router])
 
+    /* ------------------- NEW: Fetch Dashboard Data ------------------- */
+  const [dashboardData, setDashboardData] = useState<any>(null)
+
+  useEffect(() => {
+    const fetchDashboardData = async () => {
+      try {
+        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/dashboard`)
+        if (!response.ok) throw new Error("Failed to fetch dashboard data")
+        const data = await response.json()
+        setDashboardData(data)
+      } catch (error) {
+        console.error("Error fetching dashboard data:", error)
+      }
+    }
+
+    fetchDashboardData()
+  }, [])
+
   const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000"
 
   /* ------------------- Form State – COMPLETELY EMPTY ------------------- */

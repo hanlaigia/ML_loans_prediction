@@ -1,5 +1,6 @@
 from sqlalchemy.orm import Session
 from collections import defaultdict
+import traceback
 
 import models
 import schemas
@@ -36,6 +37,7 @@ def create_loan(db: Session, loan: schemas.LoanCreate):
     db.commit()
     db.refresh(db_loan)
 
+    # Chuyển đổi lại để hiển thị CF/NCF
     if hasattr(db_loan, "loan_limit") and isinstance(db_loan.loan_limit, (int, float)):
         val = db_loan.loan_limit
         if val == 0 or val == 0.0:
@@ -46,6 +48,14 @@ def create_loan(db: Session, loan: schemas.LoanCreate):
             db_loan.loan_limit = str(val)
 
     return db_loan
+
+
+def safe_limit(val):
+    """Chuyển giá trị loan_limit về float an toàn"""
+    try:
+        return float(val)
+    except Exception:
+        return 0.0
 
 
 def get_dashboard_data(db: Session, month: str = None, year: int = None):
@@ -99,9 +109,7 @@ def get_dashboard_data(db: Session, month: str = None, year: int = None):
             "loan_type_limit": group_rate(
                 lambda x: (
                     x.loan_type,
-                    "CF"
-                    if float(getattr(x, "loan_limit", 0) or 0) >= 500000
-                    else "NCF",
+                    "CF" if safe_limit(getattr(x, "loan_limit", 0)) >= 500000 else "NCF",
                 )
             ),
             "loan_purpose": group_rate(lambda x: x.loan_purpose),
@@ -113,7 +121,8 @@ def get_dashboard_data(db: Session, month: str = None, year: int = None):
 
     except Exception as e:
         print("DATABASE ERROR in get_dashboard_data:", str(e))
-        return get_empty_data()
+        traceback.print_exc()
+        return {"error": "Database query failed", "details": str(e)}
 
 
 def get_empty_data():

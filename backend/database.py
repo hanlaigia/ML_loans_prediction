@@ -27,3 +27,5 @@ def get_db():
         yield db
     finally:
         db.close()
+print("DEBUG DB_USER =", os.getenv("DB_USER"))
+print("DEBUG DB_PASSWORD =", os.getenv("DB_PASSWORD"))
