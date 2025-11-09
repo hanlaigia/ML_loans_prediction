@@ -69,7 +69,7 @@ const availableMonths = [
   { value: 10, label: "October" },
   { value: 11, label: "November" },
 ];
-const availableYears = [2019, 2020];
+const availableYears = [2019, 2025];
 
 export default function StatisticsDashboard() {
   const [isFilterOpen, setIsFilterOpen] = useState(false);
