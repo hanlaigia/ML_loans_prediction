@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import {
   Card,
   CardContent,
+  CardDescription,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
@@ -38,7 +39,23 @@ import {
   CheckCircle,
   CreditCard,
   TrendingUp,
+  Calendar,
 } from "lucide-react";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 const COLORS = ["#3b82f6", "#f97316", "#ef4444", "#10b981", "#8b5cf6"];
 
@@ -47,7 +64,17 @@ type StatisticType = "genderRisk" | "regionRisk";
 type LoanStatType = "loanTypeLimit" | "loanPurpose" | "specialTerms";
 type CollateralStatType = "occupancyRisk" | "submissionRisk";
 
+const availableMonths = [
+  { value: 9, label: "September" },
+  { value: 10, label: "October" },
+  { value: 11, label: "November" },
+];
+const availableYears = [2019, 2020];
+
 export default function StatisticsDashboard() {
+  const [isFilterOpen, setIsFilterOpen] = useState(false);
+  const [selectedMonth, setSelectedMonth] = useState<number | null>(null);
+  const [selectedYear, setSelectedYear] = useState<number | null>(null);
   const [activeSection, setActiveSection] = useState<SectionType>("demographics");
   const [selectedStat, setSelectedStat] = useState<StatisticType>("genderRisk");
   const [selectedLoanStat, setSelectedLoanStat] = useState<LoanStatType>("loanTypeLimit");
@@ -68,7 +95,8 @@ export default function StatisticsDashboard() {
     async function fetchData() {
       try {
         setLoading(true);
-        const res = await fetch("http://127.0.0.1:8000/dashboard");
+        const query = selectedMonth && selectedYear ? `?month=${selectedMonth}&year=${selectedYear}` : "";
+        const res = await fetch(`http://127.0.0.1:8000/dashboard${query}`);
         if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
         const json = await res.json();
         setRawData(json);
@@ -81,7 +109,7 @@ export default function StatisticsDashboard() {
       }
     }
     fetchData();
-  }, []);
+  }, [selectedMonth, selectedYear]);
 
   // ÁNH XẠ DỮ LIỆU
   const data = rawData
@@ -136,9 +164,10 @@ export default function StatisticsDashboard() {
       }
     : null;
 
-  const formatPercent = (v: any) => (v == null ? "N/A" : `${Number(v).toFixed(1)}%`);
+  const formatPercent = (v: any, decimals = 1) => (v == null ? "N/A" : `${Number(v).toFixed(decimals)}%`);
+  const formatCurrency = (v: any) => v == null ? "N/A" : `$${(v / 1_000_000).toFixed(1)}M`;
 
-  // MAP KEY → DATA
+  // LẤY DỮ LIỆU HIỆN TẠI
   const getCurrentData = () => {
     if (!data) return [];
     const map: Record<string, any[]> = {
@@ -170,11 +199,9 @@ export default function StatisticsDashboard() {
       return (
         <Table>
           <TableHeader><TableRow><TableHead>Gender</TableHead><TableHead className="text-right">Default Rate %</TableHead></TableRow></TableHeader>
-          <TableBody>
-            {currentData.map((r: any, i: number) => (
-              <TableRow key={i}><TableCell>{r.gender}</TableCell><TableCell className="text-right">{formatPercent(r.riskRate)}</TableCell></TableRow>
-            ))}
-          </TableBody>
+          <TableBody>{currentData.map((r: any, i: number) => (
+            <TableRow key={i}><TableCell className="font-medium">{r.gender}</TableCell><TableCell className="text-right">{formatPercent(r.riskRate)}</TableCell></TableRow>
+          ))}</TableBody>
         </Table>
       );
     }
@@ -183,11 +210,9 @@ export default function StatisticsDashboard() {
       return (
         <Table>
           <TableHeader><TableRow><TableHead>Region</TableHead><TableHead className="text-right">Default Rate %</TableHead></TableRow></TableHeader>
-          <TableBody>
-            {currentData.map((r: any, i: number) => (
-              <TableRow key={i}><TableCell>{r.region}</TableCell><TableCell className="text-right">{formatPercent(r.riskRate)}</TableCell></TableRow>
-            ))}
-          </TableBody>
+          <TableBody>{currentData.map((r: any, i: number) => (
+            <TableRow key={i}><TableCell className="font-medium">{r.region}</TableCell><TableCell className="text-right">{formatPercent(r.riskRate)}</TableCell></TableRow>
+          ))}</TableBody>
         </Table>
       );
     }
@@ -196,15 +221,13 @@ export default function StatisticsDashboard() {
       return (
         <Table>
           <TableHeader><TableRow><TableHead>Type</TableHead><TableHead className="text-right">CF %</TableHead><TableHead className="text-right">NCF %</TableHead></TableRow></TableHeader>
-          <TableBody>
-            {currentData.map((r: any, i: number) => (
-              <TableRow key={i}>
-                <TableCell>{r.type}</TableCell>
-                <TableCell className="text-right">{formatPercent(r.cf)}</TableCell>
-                <TableCell className="text-right">{formatPercent(r.ncf)}</TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
+          <TableBody>{currentData.map((r: any, i: number) => (
+            <TableRow key={i}>
+              <TableCell className="font-medium">{r.type}</TableCell>
+              <TableCell className="text-right">{formatPercent(r.cf)}</TableCell>
+              <TableCell className="text-right">{formatPercent(r.ncf)}</TableCell>
+            </TableRow>
+          ))}</TableBody>
         </Table>
       );
     }
@@ -213,11 +236,9 @@ export default function StatisticsDashboard() {
       return (
         <Table>
           <TableHeader><TableRow><TableHead>Purpose</TableHead><TableHead className="text-right">Default Rate %</TableHead></TableRow></TableHeader>
-          <TableBody>
-            {currentData.map((r: any, i: number) => (
-              <TableRow key={i}><TableCell>{r.purpose}</TableCell><TableCell className="text-right">{formatPercent(r.riskRate)}</TableCell></TableRow>
-            ))}
-          </TableBody>
+          <TableBody>{currentData.map((r: any, i: number) => (
+            <TableRow key={i}><TableCell className="font-medium">{r.purpose}</TableCell><TableCell className="text-right">{formatPercent(r.riskRate)}%</TableCell></TableRow>
+          ))}</TableBody>
         </Table>
       );
     }
@@ -226,11 +247,9 @@ export default function StatisticsDashboard() {
       return (
         <Table>
           <TableHeader><TableRow><TableHead>Term</TableHead><TableHead className="text-right">Default Rate %</TableHead></TableRow></TableHeader>
-          <TableBody>
-            {currentData.map((r: any, i: number) => (
-              <TableRow key={i}><TableCell>{r.category}</TableCell><TableCell className="text-right">{formatPercent(r.riskRate)}</TableCell></TableRow>
-            ))}
-          </TableBody>
+          <TableBody>{currentData.map((r: any, i: number) => (
+            <TableRow key={i}><TableCell className="font-medium">{r.category}</TableCell><TableCell className="text-right">{formatPercent(r.riskRate)}</TableCell></TableRow>
+          ))}</TableBody>
         </Table>
       );
     }
@@ -239,11 +258,9 @@ export default function StatisticsDashboard() {
       return (
         <Table>
           <TableHeader><TableRow><TableHead>Occupancy</TableHead><TableHead className="text-right">Default Rate %</TableHead></TableRow></TableHeader>
-          <TableBody>
-            {currentData.map((r: any, i: number) => (
-              <TableRow key={i}><TableCell>{r.type}</TableCell><TableCell className="text-right">{formatPercent(r.riskRate)}</TableCell></TableRow>
-            ))}
-          </TableBody>
+          <TableBody>{currentData.map((r: any, i: number) => (
+            <TableRow key={i}><TableCell className="font-medium">{r.type}</TableCell><TableCell className="text-right">{formatPercent(r.riskRate)}</TableCell></TableRow>
+          ))}</TableBody>
         </Table>
       );
     }
@@ -252,11 +269,9 @@ export default function StatisticsDashboard() {
       return (
         <Table>
           <TableHeader><TableRow><TableHead>Submission</TableHead><TableHead className="text-right">Default Rate %</TableHead></TableRow></TableHeader>
-          <TableBody>
-            {currentData.map((r: any, i: number) => (
-              <TableRow key={i}><TableCell>{r.method}</TableCell><TableCell className="text-right">{formatPercent(r.riskRate)}</TableCell></TableRow>
-            ))}
-          </TableBody>
+          <TableBody>{currentData.map((r: any, i: number) => (
+            <TableRow key={i}><TableCell className="font-medium">{r.method}</TableCell><TableCell className="text-right">{formatPercent(r.riskRate)}</TableCell></TableRow>
+          ))}</TableBody>
         </Table>
       );
     }
@@ -282,9 +297,7 @@ export default function StatisticsDashboard() {
         <ResponsiveContainer width="100%" height={300}>
           <PieChart>
             <Pie data={pieData} dataKey="value" nameKey="name" cx="50%" cy="50%" outerRadius={100} label>
-              {pieData.map((_: any, i: number) => (
-                <Cell key={i} fill={COLORS[i % COLORS.length]} />
-              ))}
+              {pieData.map((_: any, i: number) => <Cell key={i} fill={COLORS[i % COLORS.length]} />)}
             </Pie>
             <Tooltip formatter={(v) => formatPercent(v)} />
           </PieChart>
@@ -297,9 +310,7 @@ export default function StatisticsDashboard() {
         <ResponsiveContainer width="100%" height={300}>
           <PieChart>
             <Pie data={currentData} dataKey="riskRate" nameKey="method" cx="50%" cy="50%" outerRadius={100} label>
-              {currentData.map((_: any, i: number) => (
-                <Cell key={i} fill={COLORS[i % COLORS.length]} />
-              ))}
+              {currentData.map((_: any, i: number) => <Cell key={i} fill={COLORS[i % COLORS.length]} />)}
             </Pie>
             <Tooltip formatter={(v) => formatPercent(v)} />
           </PieChart>
@@ -307,17 +318,15 @@ export default function StatisticsDashboard() {
       );
     }
 
-    const dataKey = ["gender_risk", "region_risk", "loan_purpose", "special_terms", "occupancy_risk"].some(k => key.includes(k.split("_")[0]))
-      ? "riskRate"
-      : "value";
-
-    const nameKey = {
+    const dataKey = "riskRate";
+    const nameKeyMap: Record<string, string> = {
       genderRisk: "gender",
       regionRisk: "region",
       loanPurpose: "purpose",
       specialTerms: "category",
       occupancyRisk: "type",
-    }[key] || "name";
+    };
+    const nameKey = nameKeyMap[key] || "name";
 
     return (
       <ResponsiveContainer width="100%" height={300}>
@@ -326,86 +335,246 @@ export default function StatisticsDashboard() {
           <XAxis dataKey={nameKey} />
           <YAxis unit="%" />
           <Tooltip formatter={(v) => formatPercent(v)} />
-          <Bar dataKey={dataKey} fill="#3b82f6" />
+          <Bar dataKey={dataKey} fill="#3b82f6" name="Default Risk %" />
         </BarChart>
       </ResponsiveContainer>
     );
   };
 
-  if (loading) return <div className="p-8 text-center">Đang tải...</div>;
-  if (error || !data) return <div className="p-8 text-center text-red-600">{error || "Không có dữ liệu"}</div>;
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
+          <p className="mt-4 text-gray-600">Đang tải dữ liệu từ FastAPI...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error || !data) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <div className="text-center p-8 bg-white rounded-lg shadow">
+          <h2 className="text-xl font-bold text-red-600 mb-2">Lỗi</h2>
+          <p className="text-gray-600">{error || "Không có dữ liệu"}</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
-    <div className="min-h-screen bg-gray-50 p-6">
-      <header className="mb-6 flex justify-between items-center">
-        <h1 className="text-2xl font-bold">Risk Management Dashboard</h1>
-        <Button variant="outline" asChild><a href="/"><Home className="h-4 w-4 mr-2" /> Prediction</a></Button>
+    <div className="min-h-screen bg-transparent">
+      <header className="border-b border-border bg-card/100 backdrop-blur-md">
+        <div className="container mx-auto flex h-12 items-center justify-between px-4">
+          <div className="flex items-center gap-6">
+            <h1 className="font-semibold text-foreground">Risk Management Statistics Dashboard</h1>
+            <nav className="flex items-center gap-4 text-sm text-muted-foreground">
+              <button className="hover:text-foreground transition-colors">System</button>
+              <span>|</span>
+              <button className="hover:text-foreground transition-colors">Help</button>
+            </nav>
+          </div>
+          <Button variant="outline" asChild className="gap-2 bg-transparent">
+            <a href="/"><Home className="h-4 w-4" /> Prediction</a>
+          </Button>
+        </div>
       </header>
 
-      {/* KPI */}
-      <div className="grid grid-cols-1 md:grid-cols-5 gap-4 mb-6">
-        {[
-          { label: "Total Active Loans", value: data.total_loans.toLocaleString(), icon: CreditCard },
-          { label: "Avg Overdue Rate", value: formatPercent(data.overdue_rate), icon: Percent },
-          { label: "Total Overdue", value: `$${(data.overdue_amount / 1e6).toFixed(1)}M`, icon: DollarSign },
-          { label: "Recovery Rate", value: formatPercent(data.recovery_rate), icon: TrendingUp },
-          { label: "Model Accuracy", value: formatPercent(data.model_accuracy), icon: CheckCircle },
-        ].map((kpi, i) => (
-          <Card key={i}><CardContent className="pt-6 flex justify-between items-center">
-            <div><p className="text-sm text-muted-foreground">{kpi.label}</p><p className="text-2xl font-bold">{kpi.value}</p></div>
-            <kpi.icon className="h-8 w-8 text-primary" />
-          </CardContent></Card>
-        ))}
-      </div>
-
-      <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
-        {/* SIDEBAR */}
-        <div className="space-y-4">
-          <Card><CardHeader><CardTitle className="text-sm">Demographics</CardTitle></CardHeader>
-            <CardContent className="space-y-1">
-              <Button variant={selectedStat === "genderRisk" ? "default" : "secondary"} className="w-full justify-start text-xs"
-                onClick={() => { setActiveSection("demographics"); setSelectedStat("genderRisk"); }}>1. Risk by Gender</Button>
-              <Button variant={selectedStat === "regionRisk" ? "default" : "secondary"} className="w-full justify-start text-xs"
-                onClick={() => { setActiveSection("demographics"); setSelectedStat("regionRisk"); }}>2. Risk by Region</Button>
+      <main className="container mx-auto px-4 py-6">
+        {/* KPI */}
+        <div className="grid grid-cols-1 md:grid-cols-5 gap-4 mb-6">
+          <Card className="bg-card/100 backdrop-blur-md">
+            <CardContent className="pt-6 flex items-center justify-between">
+              <div><p className="text-sm text-muted-foreground">Total Active Loans</p><p className="text-2xl font-bold text-foreground">{data.total_loans.toLocaleString()}</p></div>
+              <CreditCard className="h-8 w-8 text-primary" />
             </CardContent>
           </Card>
-
-          <Card><CardHeader><CardTitle className="text-sm">Loan</CardTitle></CardHeader>
-            <CardContent className="space-y-1">
-              <Button variant={selectedLoanStat === "loanTypeLimit" ? "default" : "secondary"} className="w-full justify-start text-xs"
-                onClick={() => { setActiveSection("loan"); setSelectedLoanStat("loanTypeLimit"); }}>1. Loan Type & Limit</Button>
-              <Button variant={selectedLoanStat === "loanPurpose" ? "default" : "secondary"} className="w-full justify-start text-xs"
-                onClick={() => { setActiveSection("loan"); setSelectedLoanStat("loanPurpose"); }}>2. Loan Purpose</Button>
-              <Button variant={selectedLoanStat === "specialTerms" ? "default" : "secondary"} className="w-full justify-start text-xs"
-                onClick={() => { setActiveSection("loan"); setSelectedLoanStat("specialTerms"); }}>3. Special Terms</Button>
+          <Card className="bg-card/100 backdrop-blur-md">
+            <CardContent className="pt-6 flex items-center justify-between">
+              <div><p className="text-sm text-muted-foreground">Avg Overdue Rate</p><p className="text-2xl font-bold text-foreground">{formatPercent(data.overdue_rate, 1)}</p></div>
+              <Percent className="h-8 w-8 text-orange-500" />
             </CardContent>
           </Card>
-
-          <Card><CardHeader><CardTitle className="text-sm">Collateral</CardTitle></CardHeader>
-            <CardContent className="space-y-1">
-              <Button variant={selectedCollateralStat === "occupancyRisk" ? "default" : "secondary"} className="w-full justify-start text-xs"
-                onClick={() => { setActiveSection("collateral"); setSelectedCollateralStat("occupancyRisk"); }}>1. Occupancy Risk</Button>
-              <Button variant={selectedCollateralStat === "submissionRisk" ? "default" : "secondary"} className="w-full justify-start text-xs"
-                onClick={() => { setActiveSection("collateral"); setSelectedCollateralStat("submissionRisk"); }}>2. Submission Risk</Button>
+          <Card className="bg-card/100 backdrop-blur-md">
+            <CardContent className="pt-6 flex items-center justify-between">
+              <div><p className="text-sm text-muted-foreground">Total Overdue Amount</p><p className="text-2xl font-bold text-foreground">{formatCurrency(data.overdue_amount)}</p></div>
+              <DollarSign className="h-8 w-8 text-destructive" />
+            </CardContent>
+          </Card>
+          <Card className="bg-card/100 backdrop-blur-md">
+            <CardContent className="pt-6 flex items-center justify-between">
+              <div><p className="text-sm text-muted-foreground">Recovery Rate</p><p className="text-2xl font-bold text-foreground">{formatPercent(data.recovery_rate, 1)}</p></div>
+              <TrendingUp className="h-8 w-8 text-green-500" />
+            </CardContent>
+          </Card>
+          <Card className="bg-card/100 backdrop-blur-md">
+            <CardContent className="pt-6 flex items-center justify-between">
+              <div><p className="text-sm text-muted-foreground">Model Accuracy</p><p className="text-2xl font-bold text-foreground">{formatPercent(data.model_accuracy, 1)}</p></div>
+              <CheckCircle className="h-8 w-8 text-green-500" />
             </CardContent>
           </Card>
         </div>
 
-        {/* MAIN CONTENT */}
-        <div className="lg:col-span-3 space-y-4">
-          <Card><CardContent className="py-3 flex justify-between items-center">
-            <h2 className="text-lg font-semibold">
-              {activeSection === "demographics" ? (selectedStat === "genderRisk" ? "Risk by Gender" : "Risk by Region") :
-               activeSection === "loan" ? (selectedLoanStat === "loanTypeLimit" ? "Loan Type & Limit" : selectedLoanStat === "loanPurpose" ? "Loan Purpose" : "Special Terms") :
-               activeSection === "collateral" ? (selectedCollateralStat === "occupancyRisk" ? "Occupancy Risk" : "Submission Risk") : ""}
-            </h2>
-            <Button variant="outline" size="sm"><Download className="h-4 w-4 mr-2" /> Save</Button>
-          </CardContent></Card>
+        {/* MAIN GRID */}
+        <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+          {/* LEFT PANELS */}
+          <div className="lg:col-span-1 space-y-6">
+            {/* Demographics */}
+            <Card className="bg-card/100 backdrop-blur-md">
+              <CardHeader className="pb-0">
+                <CardTitle className="text-sm">Demographics Overview</CardTitle>
+                <CardDescription className="text-xs">Select a statistic</CardDescription>
+              </CardHeader>
+              <CardContent className="pt-0 mt-[-4px]">
+                <div className="space-y-1">
+                  {[
+                    { id: "genderRisk" as StatisticType, number: "1", label: "Risk Distribution by Gender" },
+                    { id: "regionRisk" as StatisticType, number: "2", label: "Risk Allocation by Region" },
+                  ].map((stat) => {
+                    const isSelected = activeSection === "demographics" && selectedStat === stat.id;
+                    return (
+                      <Button
+                        key={stat.id}
+                        variant={isSelected ? "default" : "secondary"}
+                        className={`w-full justify-start gap-2 text-xs h-8 ${isSelected ? "ring-2 ring-primary/50" : ""}`}
+                        onClick={() => { setActiveSection("demographics"); setSelectedStat(stat.id); }}
+                      >
+                        <span className="flex h-4 w-4 items-center justify-center rounded text-xs font-semibold bg-white text-primary">{stat.number}</span>
+                        <span className="flex-1 text-left truncate">{stat.label}</span>
+                      </Button>
+                    );
+                  })}
+                </div>
+              </CardContent>
+            </Card>
 
-          <Card><CardHeader><CardTitle className="text-base">Data Table</CardTitle></CardHeader><CardContent>{renderTable()}</CardContent></Card>
-          <Card><CardHeader><CardTitle className="text-base">Chart</CardTitle></CardHeader><CardContent>{renderChart()}</CardContent></Card>
+            {/* Loan */}
+            <Card className="bg-card/100 backdrop-blur-md">
+              <CardHeader className="pb-0">
+                <CardTitle className="text-sm">Loan Characteristics</CardTitle>
+                <CardDescription className="text-xs">Select a statistic</CardDescription>
+              </CardHeader>
+              <CardContent className="pt-0 mt-[-4px]">
+                <div className="space-y-1">
+                  {[
+                    { id: "loanTypeLimit" as LoanStatType, number: "1", label: "Risk by Loan Limit and Type" },
+                    { id: "loanPurpose" as LoanStatType, number: "2", label: "Risk by Loan Purpose" },
+                    { id: "specialTerms" as LoanStatType, number: "3", label: "Impact of Special Terms" },
+                  ].map((stat) => {
+                    const isSelected = activeSection === "loan" && selectedLoanStat === stat.id;
+                    return (
+                      <Button
+                        key={stat.id}
+                        variant={isSelected ? "default" : "secondary"}
+                        className={`w-full justify-start gap-2 text-xs h-8 ${isSelected ? "ring-2 ring-primary/50" : ""}`}
+                        onClick={() => { setActiveSection("loan"); setSelectedLoanStat(stat.id); }}
+                      >
+                        <span className="flex h-4 w-4 items-center justify-center rounded text-xs font-semibold bg-white text-primary">{stat.number}</span>
+                        <span className="flex-1 text-left truncate">{stat.label}</span>
+                      </Button>
+                    );
+                  })}
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Collateral */}
+            <Card className="bg-card/100 backdrop-blur-md">
+              <CardHeader className="pb-0">
+                <CardTitle className="text-sm">Collateral and Application</CardTitle>
+                <CardDescription className="text-xs">Select a statistic</CardDescription>
+              </CardHeader>
+              <CardContent className="pt-0 mt-[-4px]">
+                <div className="space-y-1">
+                  {[
+                    { id: "occupancyRisk" as CollateralStatType, number: "1", label: "Risk by Occupancy Type" },
+                    { id: "submissionRisk" as CollateralStatType, number: "2", label: "Risk by Submission Method" },
+                  ].map((stat) => {
+                    const isSelected = activeSection === "collateral" && selectedCollateralStat === stat.id;
+                    return (
+                      <Button
+                        key={stat.id}
+                        variant={isSelected ? "default" : "secondary"}
+                        className={`w-full justify-start gap-2 text-xs h-8 ${isSelected ? "ring-2 ring-primary/50" : ""}`}
+                        onClick={() => { setActiveSection("collateral"); setSelectedCollateralStat(stat.id); }}
+                      >
+                        <span className="flex h-4 w-4 items-center justify-center rounded text-xs font-semibold bg-white text-primary">{stat.number}</span>
+                        <span className="flex-1 text-left truncate">{stat.label}</span>
+                      </Button>
+                    );
+                  })}
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* RIGHT PANEL */}
+          <div className="lg:col-span-3 space-y-4">
+            <Card className="bg-card/100 backdrop-blur-md">
+              <CardContent className="py-3 flex justify-between items-center">
+                <h2 className="text-lg font-semibold text-foreground">
+                  {activeSection === "demographics" ? (selectedStat === "genderRisk" ? "Risk Distribution by Gender" : "Risk Allocation by Region") :
+                   activeSection === "loan" ? (selectedLoanStat === "loanTypeLimit" ? "Risk by Loan Limit and Type" : selectedLoanStat === "loanPurpose" ? "Risk by Loan Purpose" : "Impact of Special Terms") :
+                   activeSection === "collateral" ? (selectedCollateralStat === "occupancyRisk" ? "Risk by Occupancy Type" : "Risk by Submission Method") : ""}
+                </h2>
+                <div className="flex gap-2">
+                  <Dialog open={isFilterOpen} onOpenChange={setIsFilterOpen}>
+                    <DialogTrigger asChild>
+                      <Button variant="outline" size="sm" className="gap-2 bg-transparent">
+                        <Calendar className="h-4 w-4" />
+                        {selectedMonth && selectedYear ? `${availableMonths.find(m => m.value === selectedMonth)?.label} ${selectedYear}` : "Filter by Month/Year"}
+                      </Button>
+                    </DialogTrigger>
+                    <DialogContent className="sm:max-w-md">
+                      <DialogHeader>
+                        <DialogTitle>Filter by Time Period</DialogTitle>
+                        <DialogDescription>Select month and year to view specific data</DialogDescription>
+                      </DialogHeader>
+                      <div className="grid gap-4 py-4">
+                        <div className="grid grid-cols-2 gap-4">
+                          <div>
+                            <label className="text-sm font-medium block mb-2">Year</label>
+                            <Select value={selectedYear?.toString() || ""} onValueChange={(v) => setSelectedYear(Number(v))}>
+                              <SelectTrigger><SelectValue placeholder="Select year" /></SelectTrigger>
+                              <SelectContent>{availableYears.map(y => <SelectItem key={y} value={y.toString()}>{y}</SelectItem>)}</SelectContent>
+                            </Select>
+                          </div>
+                          <div>
+                            <label className="text-sm font-medium block mb-2">Month</label>
+                            <Select value={selectedMonth?.toString() || ""} onValueChange={(v) => { setSelectedMonth(Number(v)); setIsFilterOpen(false); }} disabled={!selectedYear}>
+                              <SelectTrigger><SelectValue placeholder="Select month" /></SelectTrigger>
+                              <SelectContent>{availableMonths.map(m => <SelectItem key={m.value} value={m.value.toString()}>{m.label}</SelectItem>)}</SelectContent>
+                            </Select>
+                          </div>
+                        </div>
+                        {(selectedMonth || selectedYear) && (
+                          <Button variant="ghost" className="text-red-600" onClick={() => { setSelectedMonth(null); setSelectedYear(null); setIsFilterOpen(false); }}>
+                            Clear All Filters
+                          </Button>
+                        )}
+                      </div>
+                    </DialogContent>
+                  </Dialog>
+                  <Button variant="outline" size="sm" className="gap-2 bg-transparent">
+                    <Download className="h-4 w-4" /> Save
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card className="bg-card/100 backdrop-blur-md">
+              <CardHeader><CardTitle className="text-base">Data Table</CardTitle></CardHeader>
+              <CardContent>{renderTable()}</CardContent>
+            </Card>
+
+            <Card className="bg-card/100 backdrop-blur-md">
+              <CardHeader><CardTitle className="text-base">Chart Visualization</CardTitle></CardHeader>
+              <CardContent>{renderChart()}</CardContent>
+            </Card>
+          </div>
         </div>
-      </div>
+      </main>
     </div>
   );
 }
