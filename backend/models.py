@@ -36,4 +36,4 @@ class Loan(Base):
     Neg_ammortization = Column(String(10), nullable=True)
     interest_only = Column(String(10), nullable=True)
     lump_sum_payment = Column(String(10), nullable=True)
-    status = Column(Integer, nullable=True)
+    prediction = Column(Integer, nullable=True)

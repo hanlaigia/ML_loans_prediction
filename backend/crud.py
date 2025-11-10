@@ -73,9 +73,9 @@ def get_dashboard_data(db: Session, month: str = None, year: int = None):
         if total == 0:
             return get_empty_data()
 
-        overdue = sum(1 for l in loans if getattr(l, "status", 0) == 1)
+        overdue = sum(1 for l in loans if getattr(l, "prediction", 0) == 1)
         total_overdue_amount = sum(
-            (l.loan_amount or 0) for l in loans if getattr(l, "status", 0) == 1
+            (l.loan_amount or 0) for l in loans if getattr(l, "prediction", 0) == 1
         )
 
         def group_rate(key_fn):
@@ -89,7 +89,7 @@ def get_dashboard_data(db: Session, month: str = None, year: int = None):
             for k, v in groups.items():
                 if not v:
                     continue
-                default_cnt = sum(1 for x in v if getattr(x, "status", 0) == 1)
+                default_cnt = sum(1 for x in v if getattr(x, "prediction", 0) == 1)
                 rate = (default_cnt / len(v)) * 100 if len(v) > 0 else 0
                 result.append(
                     {
