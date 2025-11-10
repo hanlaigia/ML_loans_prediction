@@ -54,7 +54,7 @@ def get_dashboard(month: str | None = None, year: int | None = None, db: Session
 
         # 🟩 Tổng số khoản vay đang hoạt động (status = 0)
         total_active_loans = db.execute(
-            text(f"SELECT COUNT(*) FROM loan_prediction.loans WHERE status = 0{(' AND ' + ' AND '.join(filters)) if filters else ''}"),
+            text(f"SELECT COUNT(*) FROM loan_prediction.loans WHERE prediction = 0{(' AND ' + ' AND '.join(filters)) if filters else ''}"),
             params,
         ).scalar()
 
@@ -66,7 +66,7 @@ def get_dashboard(month: str | None = None, year: int | None = None, db: Session
 
         # 🟩 Tỷ lệ trung bình nợ quá hạn (status = 1)
         avg_overdue_rate = db.execute(
-            text(f"SELECT (COUNT(*) * 100.0 / (SELECT COUNT(*) FROM loan_prediction.loans{where_clause})) FROM loan_prediction.loans WHERE status = 1{(' AND ' + ' AND '.join(filters)) if filters else ''}"),
+            text(f"SELECT (COUNT(*) * 100.0 / (SELECT COUNT(*) FROM loan_prediction.loans{where_clause})) FROM loan_prediction.loans WHERE prediction = 1{(' AND ' + ' AND '.join(filters)) if filters else ''}"),
             params,
         ).scalar() or 0.0
         avg_overdue_rate = round(avg_overdue_rate, 2)
