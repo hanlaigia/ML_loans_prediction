@@ -114,7 +114,7 @@ export default function StatisticsDashboard() {
   // ÁNH XẠ DỮ LIỆU
   const data = rawData
     ? {
-        total_loans: rawData.total_active_loans ?? 0,
+        total_active_loans: rawData.total_active_loans ?? 0,
         overdue_rate: rawData.avg_overdue_rate_percent ?? 0,
         overdue_amount: rawData.total_overdue_amount ?? 0,
         recovery_rate: rawData.recovery_rate_percent ?? 0,
@@ -346,7 +346,7 @@ export default function StatisticsDashboard() {
       <div className="min-h-screen flex items-center justify-center bg-gray-50">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
-          <p className="mt-4 text-gray-600">Đang tải dữ liệu từ FastAPI...</p>
+          <p className="mt-4 text-gray-600">Loading...</p>
         </div>
       </div>
     );
@@ -386,7 +386,7 @@ export default function StatisticsDashboard() {
         <div className="grid grid-cols-1 md:grid-cols-5 gap-4 mb-6">
           <Card className="bg-card/100 backdrop-blur-md">
             <CardContent className="pt-6 flex items-center justify-between">
-              <div><p className="text-sm text-muted-foreground">Total Active Loans</p><p className="text-2xl font-bold text-foreground">{data.total_loans.toLocaleString()}</p></div>
+              <div><p className="text-sm text-muted-foreground">Total Active Loans</p><p className="text-2xl font-bold text-foreground">{data.total_active_loans.toLocaleString()}</p></div>
               <CreditCard className="h-8 w-8 text-primary" />
             </CardContent>
           </Card>

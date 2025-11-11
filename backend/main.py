@@ -1,17 +1,17 @@
 from fastapi import FastAPI, Depends
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.orm import Session
-from sqlalchemy import text, func
+from sqlalchemy import text
+import traceback
 
-from database import Base, engine, get_db
+from database import Base, engine, get_db, SessionLocal
 from routers import loans
 import models
 import crud
-import traceback
 
 Base.metadata.create_all(bind=engine)
 
-app = FastAPI(title="Loan Prediction API", version="1.0")
+app = FastAPI(title="Loan Prediction API", version="1.1")
 
 app.add_middleware(
     CORSMiddleware,
@@ -21,11 +21,9 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-
 @app.get("/")
 def root():
     return {"message": "Backend connected successfully"}
-
 
 # =========================================================
 # 🧩 DASHBOARD ROUTE — THỐNG KÊ TỪ BẢNG loan_prediction.loans
@@ -33,47 +31,54 @@ def root():
 @app.get("/dashboard")
 def get_dashboard(month: str | None = None, year: int | None = None, db: Session = Depends(get_db)):
     try:
-        # 🟩 Điều kiện lọc
-        filters = []
+        # 1️⃣ Xây where clause an toàn
+        conditions = ["1=1"]
         params = {}
-
         if month:
-            filters.append("Month = :month")
+            conditions.append("Month = :month")
             params["month"] = month
         if year:
-            filters.append("Year = :year")
+            conditions.append("Year = :year")
             params["year"] = year
 
-        where_clause = " WHERE " + " AND ".join(filters) if filters else ""
+        where_clause = " AND ".join(conditions)
 
-        # 🟩 Đếm tổng số khoản vay
-        total_loans = db.execute(
-            text(f"SELECT COUNT(*) FROM loan_prediction.loans{where_clause}"),
-            params,
-        ).scalar()
-
-        # 🟩 Tổng số khoản vay đang hoạt động (status = 0)
-        total_active_loans = db.execute(
-            text(f"SELECT COUNT(*) FROM loan_prediction.loans WHERE prediction = 0{(' AND ' + ' AND '.join(filters)) if filters else ''}"),
-            params,
-        ).scalar()
-
-        # 🟩 Trung bình loan_amount
-        avg_loan_amount = db.execute(
-            text(f"SELECT AVG(loan_amount) FROM loan_prediction.loans{where_clause}"),
-            params,
-        ).scalar()
-
-        # 🟩 Tỷ lệ trung bình nợ quá hạn (status = 1)
-        avg_overdue_rate = db.execute(
-            text(f"SELECT (COUNT(*) * 100.0 / (SELECT COUNT(*) FROM loan_prediction.loans{where_clause})) FROM loan_prediction.loans WHERE prediction = 1{(' AND ' + ' AND '.join(filters)) if filters else ''}"),
-            params,
-        ).scalar() or 0.0
+        # 2️⃣ Thực thi các truy vấn thống kê chính
+        with db.begin():
+            total_loans = db.execute(
+                text(f"SELECT COUNT(*) FROM loan_prediction.loans WHERE {where_clause}"), params
+            ).scalar()
+        with db.begin():
+            total_active_loans = db.execute(
+                text(f"SELECT COUNT(*) FROM loan_prediction.loans WHERE prediction = 0 AND {where_clause}"), params
+            ).scalar()
+        with db.begin():
+            avg_loan_amount = db.execute(
+                text(f"SELECT AVG(loan_amount) FROM loan_prediction.loans WHERE {where_clause}"), params
+            ).scalar()
+        with db.begin():
+            avg_overdue_rate = db.execute(
+                text(f"""
+                    SELECT (COUNT(*) * 100.0 / NULLIF(
+                        (SELECT COUNT(*) FROM loan_prediction.loans WHERE {where_clause}),
+                        0
+                    ))
+                    FROM loan_prediction.loans
+                    WHERE prediction = 1 AND {where_clause}
+                """), params
+            ).scalar() or 0.0
         avg_overdue_rate = round(avg_overdue_rate, 2)
 
-        # 🟩 Gọi hàm CRUD để thống kê chi tiết hơn
-        crud_data = crud.get_dashboard_data(db, month, year)
+        # 3️⃣ Gọi CRUD với session riêng để tránh rollback toàn bộ
+        crud_data = {}
+        try:
+            with SessionLocal() as local_db:
+                crud_data = crud.get_dashboard_data(local_db, month, year)
+        except Exception as e:
+            print("⚠️ Warning: get_dashboard_data() failed, ignoring CRUD stats")
+            print(e)
 
+        # 4️⃣ Trả kết quả JSON
         return {
             "total_loans": total_loans,
             "total_active_loans": total_active_loans,
@@ -86,7 +91,6 @@ def get_dashboard(month: str | None = None, year: int | None = None, db: Session
         print("❌ ERROR in /dashboard:", e)
         traceback.print_exc()
         return {"error": "Database query failed", "details": str(e)}
-
 
 # =========================================================
 # ROUTERS

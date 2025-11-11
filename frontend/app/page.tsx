@@ -164,13 +164,10 @@ export default function LoanPredictFullUI() {
     loan_amount: 0,
     rate_of_interest: 0,
     rate_of_interest_monthly: 0,
-    Interest_rate_spread: 0,
-    Upfront_charges: 0,
     term: 0,
     Neg_ammortization: "",
     interest_only: "",
     lump_sum_payment: "",
-    property_value: 0,
     construction_type: "",
     occupancy_type: "",
     Secured_by: "",
@@ -185,7 +182,6 @@ export default function LoanPredictFullUI() {
     Region: "",
     Security_Type: "",
     Status: 0,
-    dtir1: 0,
   })
 
   const [predicting, setPredicting] = useState(false)
@@ -597,20 +593,6 @@ export default function LoanPredictFullUI() {
                             </SelectContent>
                           </Select>
                         </div>
-
-                        <div className="space-y-2">
-                          <Label htmlFor="dtir1">DTI Ratio (dtir1)</Label>
-                          <Input
-                            id="dtir1"
-                            type="number"
-                            step="0.1"
-                            placeholder="e.g. 47.0"
-                            value={form.dtir1 || ""}
-                            onChange={(e) =>
-                              handleChange("dtir1", Number(e.target.value) || 0)
-                            }
-                          />
-                        </div>
                       </div>
                     </fieldset>
                   </AccordionContent>
@@ -723,44 +705,6 @@ export default function LoanPredictFullUI() {
                                 val / 12 / 100
                               )
                             }}
-                          />
-                        </div>
-
-                        <div className="space-y-2">
-                          <Label htmlFor="interest-rate-spread">
-                            Interest Rate Spread
-                          </Label>
-                          <Input
-                            id="interest-rate-spread"
-                            type="number"
-                            step="0.01"
-                            placeholder="e.g. 0.4"
-                            value={form.Interest_rate_spread || ""}
-                            onChange={(e) =>
-                              handleChange(
-                                "Interest_rate_spread",
-                                Number(e.target.value) || 0
-                              )
-                            }
-                          />
-                        </div>
-
-                        <div className="space-y-2">
-                          <Label htmlFor="upfront-charges">
-                            Upfront Charges
-                          </Label>
-                          <Input
-                            id="upfront-charges"
-                            type="number"
-                            step="0.01"
-                            placeholder="e.g. 600"
-                            value={form.Upfront_charges || ""}
-                            onChange={(e) =>
-                              handleChange(
-                                "Upfront_charges",
-                                Number(e.target.value) || 0
-                              )
-                            }
                           />
                         </div>
 
@@ -1031,24 +975,7 @@ export default function LoanPredictFullUI() {
                             </SelectContent>
                           </Select>
                         </div>
-
-                        <div className="space-y-2">
-                          <Label htmlFor="property-value">
-                            Property Value
-                          </Label>
-                          <Input
-                            id="property-value"
-                            type="number"
-                            placeholder="e.g. 300000"
-                            value={form.property_value || ""}
-                            onChange={(e) =>
-                              handleChange(
-                                "property_value",
-                                Number(e.target.value) || 0
-                              )
-                            }
-                          />
-                        </div>
+              
                       </div>
                     </fieldset>
                   </AccordionContent>
