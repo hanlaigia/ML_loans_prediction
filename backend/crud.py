@@ -1,6 +1,7 @@
 from sqlalchemy.orm import Session
 from collections import defaultdict
 import traceback
+from datetime import datetime
 
 
 import models
@@ -19,9 +20,11 @@ def create_loan(db: Session, loan: schemas.LoanCreate):
     if "co-applicant_credit_type" in loan_data and "co_applicant_credit_type" not in loan_data:
         loan_data["co_applicant_credit_type"] = loan_data.pop("co-applicant_credit_type")
 
-
     allowed_columns = {col.name for col in models.Loan.__table__.columns}
     filtered_data = {k: v for k, v in loan_data.items() if k in allowed_columns}
+
+    filtered_data["Month"] = datetime.now().strftime("%B")
+    filtered_data["Year"] = datetime.now().year
 
 
     if "loan_limit" in filtered_data:
@@ -78,8 +81,6 @@ def get_dashboard_data(db: Session, month: str = None, year: int = None):
 
         if month:
             query = query.filter(models.Loan.Month == month)
-        # if year and hasattr(models.Loan, "Year"):
-        #     query = query.filter(models.Loan.Year == year)
 
 
         loans = query.all()

@@ -251,7 +251,7 @@ export default function LoanPredictFullUI() {
       })
       if (!res.ok) throw new Error(`Save failed: ${await res.text()}`)
       const d = await res.json()
-      alert(`Saved successfully! ID: ${d.ID}`)
+      alert(`Saved successfully! ID: ${d.id}`)
     } catch (e: any) {
       alert(e.message)
     } finally {

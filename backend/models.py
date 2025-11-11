@@ -1,22 +1,21 @@
- # backend/models.py
 from sqlalchemy import Column, String, Float, Integer, Double
 from database import Base
 
 class Loan(Base):
     __tablename__ = "loans"
 
-    # THÊM DÒNG NÀY: id là khóa chính
     id = Column(Integer, primary_key=True, autoincrement=True)
 
     Month = Column(String(20), nullable=True)
+    Year = Column(Integer, nullable=True)
     Gender = Column(String(10), nullable=True)
-    Age = Column(String(10), nullable=True)
+    age = Column(String(10), nullable=True)
     Region = Column(String(50), nullable=True)
     submission_of_application = Column(String(10), nullable=True)
     approv_in_adv = Column(String(10), nullable=True)
     income = Column(Double, nullable=True)
     Credit_Score = Column(Double, nullable=True)
-    Credit_type = Column(String(50), nullable=True)
+    credit_type = Column(String(50), nullable=True)
     co_applicant_credit_type = Column(String(50), nullable=True)
     Credit_Worthiness = Column(String(50), nullable=True)
     open_credit = Column(String(10), nullable=True)
@@ -37,3 +36,4 @@ class Loan(Base):
     interest_only = Column(String(10), nullable=True)
     lump_sum_payment = Column(String(10), nullable=True)
     prediction = Column(Integer, nullable=True)
+    probability = Column(Float, nullable=True)

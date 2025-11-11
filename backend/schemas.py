@@ -2,11 +2,6 @@ from pydantic import BaseModel
 from typing import Optional
 
 
-# ==============================
-# Loan Schemas
-# ==============================
-
-
 class LoanBase(BaseModel):
     loan_limit: Optional[str] = None
     Gender: Optional[str] = None
@@ -37,20 +32,15 @@ class LoanBase(BaseModel):
     Security_Type: Optional[str] = None
 
 
-# Schema dùng để tạo mới khoản vay
 class LoanCreate(LoanBase):
-    pass
+    age: float
+    credit_type: str
+    prediction: int
+    probability: float
 
 
-
-
-# Schema dùng để trả về cho API
 class LoanResponse(LoanBase):
     id: int
 
-
     class Config:
         orm_mode = True
-
-
-

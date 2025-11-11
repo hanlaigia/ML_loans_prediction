@@ -16,9 +16,7 @@ def read_loans(db: Session = Depends(get_db)):
 def create_loan(loan: schemas.LoanCreate, db: Session = Depends(get_db)):
     return crud.create_loan(db, loan)
 
-# @router.post("/predict")
-# def predict_loan(features: dict):
-#     return predict(features)
+
 @router.post("/predict")
 def predict_loan(data: schemas.LoanBase):
     result = model_predict(data.dict())  # chạy mô hình
