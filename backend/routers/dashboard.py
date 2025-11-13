@@ -10,5 +10,12 @@ def get_dashboard(month: str = None, year: int = None, db: Session = Depends(get
     data = crud.get_dashboard_data(db, month, year)
     data["model_accuracy"] = 90.14  # cố định
     return data
+@router.get("/filters")
+def get_filters(db: Session = Depends(get_db)):
+    return {
+        "years": get_available_years(db),
+        "months": get_available_months()
+    }
+
 
 

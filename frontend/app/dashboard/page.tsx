@@ -65,11 +65,29 @@ type LoanStatType = "loanTypeLimit" | "loanPurpose" | "specialTerms";
 type CollateralStatType = "occupancyRisk" | "submissionRisk";
 
 const availableMonths = [
+  { value: 1, label: "January" },
+  { value: 2, label: "February" },
+  { value: 3, label: "March" },
+  { value: 4, label: "April" },
+  { value: 5, label: "May" },
+  { value: 6, label: "June" },
+  { value: 7, label: "July" },
+  { value: 8, label: "August" },
   { value: 9, label: "September" },
   { value: 10, label: "October" },
   { value: 11, label: "November" },
+  { value: 12, label: "December" },
 ];
-const availableYears = [2019, 2025];
+
+
+const currentYear = new Date().getFullYear();
+
+
+const availableYears = Array.from(
+  { length: currentYear - 2000 + 1 },
+  (_, i) => currentYear - i
+);
+
 
 export default function StatisticsDashboard() {
   const [isFilterOpen, setIsFilterOpen] = useState(false);
