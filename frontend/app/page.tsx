@@ -120,16 +120,36 @@ const ageValueToGroup = (value: number): string => {
 /* ============================================================= */
 /* 3. MAIN COMPONENT                                            */
 /* ============================================================= */
+// export default function LoanPredictFullUI() {
+//   const router = useRouter()
+//   // Redirect immediately if not logged in
+//   if (typeof window !== "undefined") {
+//     const isLoggedIn = localStorage.getItem("isLoggedIn")
+//     if (!isLoggedIn) {
+//       router.replace("/login")
+//       return null
+//     }
+//   }
+
+
+
+//   /* ------------------- Authentication ------------------- */
+//   useEffect(() => {
+//     const isLoggedIn = localStorage.getItem("isLoggedIn")
+//     if (!isLoggedIn) {
+//       router.replace("/login")
+//     }
+//   }, [])
+
 export default function LoanPredictFullUI() {
   const router = useRouter()
 
-  /* ------------------- Authentication ------------------- */
   useEffect(() => {
-    if (typeof window !== "undefined") {
-      const isLoggedIn = localStorage.getItem("isLoggedIn")
-      if (!isLoggedIn) router.replace("/login")
+    const isLoggedIn = localStorage.getItem("isLoggedIn")
+    if (!isLoggedIn) {
+      router.replace("/login")
     }
-  }, [router])
+  }, [])
 
     /* ------------------- NEW: Fetch Dashboard Data ------------------- */
   const [dashboardData, setDashboardData] = useState<any>(null)
