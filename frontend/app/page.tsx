@@ -259,7 +259,41 @@ export default function LoanPredictFullUI() {
     }
   }
 
-  const handleClear = () => setResult(null)
+  const handleClear = () => {
+  setResult(null)
+  setForm({
+    loan_limit: "",
+    Gender: "",
+    approv_in_adv: "",
+    loan_type: "",
+    loan_purpose: "",
+    Credit_Worthiness: "",
+    open_credit: "",
+    business_or_commercial: "",
+    loan_amount: 0,
+    rate_of_interest: 0,
+    rate_of_interest_monthly: 0,
+    term: 0,
+    Neg_ammortization: "",
+    interest_only: "",
+    lump_sum_payment: "",
+    construction_type: "",
+    occupancy_type: "",
+    Secured_by: "",
+    total_units: "",
+    income: 0,
+    credit_type: "",
+    Credit_Score: 0,
+    co_applicant_credit_type: "",
+    age: 0,
+    submission_of_application: "",
+    LTV: 0,
+    Region: "",
+    Security_Type: "",
+    Status: 0,
+    })
+  }
+
   const handleLogout = () => {
     localStorage.clear()
     router.push("/login")
@@ -1097,7 +1131,7 @@ export default function LoanPredictFullUI() {
                   className="gap-2 bg-primary text-primary-foreground"
                 >
                   <RotateCcw className="h-4 w-4" />
-                  Clear Result
+                  Clear
                 </Button>
               </div>
             </CardContent>
