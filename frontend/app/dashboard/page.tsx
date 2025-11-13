@@ -116,7 +116,7 @@ export default function StatisticsDashboard() {
     if (!isLoggedIn) router.replace("/login");
   }, [router]);
 
-  useEffect(() => {
+    useEffect(() => {
     async function fetchData() {
       try {
         setLoading(true);
@@ -155,7 +155,6 @@ export default function StatisticsDashboard() {
   }, [page]);
 
 
-
   // ÁNH XẠ DỮ LIỆU
   const data = rawData
     ? {
@@ -172,6 +171,11 @@ export default function StatisticsDashboard() {
         region_risk: (rawData.region_risk ?? [])
           .filter((r: any) => r.default_rate_percent > 0)
           .map((r: any) => ({ region: r.key, riskRate: r.default_rate_percent })),
+
+        credit_capacity: (rawData.credit_capacity ?? []).map((r:any) => ({
+            level: r.group_name,
+            percentage: r.percentage
+        })),
 
         loan_type_limit: (() => {
           const map = new Map<string, any>();
@@ -218,6 +222,7 @@ export default function StatisticsDashboard() {
     const map: Record<string, any[]> = {
       genderRisk: data.gender_risk,
       regionRisk: data.region_risk,
+      creditCapacity: data.credit_capacity,
       loanTypeLimit: data.loan_type_limit,
       loanPurpose: data.loan_purpose,
       specialTerms: data.special_terms,
@@ -261,6 +266,62 @@ export default function StatisticsDashboard() {
         </Table>
       );
     }
+    
+    
+    if (key === "creditCapacity") {
+      return (
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead>Level</TableHead>
+              <TableHead className="text-right">Percentage %</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {currentData.map((r:any, i:number)=>(
+              <TableRow key={i}>
+                <TableCell>{r.level}</TableCell>
+                <TableCell className="text-right">{formatPercent(r.percentage)}</TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      );
+    }
+
+    // CREDIT WORTHINESS (L1 vs L2) – Doughnut Chart
+    if (key === "creditCapacity" && data.credit_capacity) {
+        const cwData = data.credit_capacity.filter(item =>
+            item.level.toLowerCase().includes("l1") ||
+            item.level.toLowerCase().includes("l2")
+        );
+
+        if (cwData.length > 0) {
+            return (
+                <ResponsiveContainer width="100%" height={300}>
+                    <PieChart>
+                        <Pie
+                            data={cwData}
+                            dataKey="percentage"
+                            nameKey="level"
+                            cx="50%"
+                            cy="50%"
+                            innerRadius={70}
+                            outerRadius={120}
+                            label
+                        >
+                            {cwData.map((_: any, i: number) => (
+                                <Cell key={i} fill={COLORS[i % COLORS.length]} />
+                            ))}
+                        </Pie>
+                        <Tooltip formatter={(v) => `${v.toFixed(1)}%`} />
+                        <Legend />
+                    </PieChart>
+                </ResponsiveContainer>
+            );
+        }
+    }
+
 
     if (key === "loanTypeLimit") {
       return (
@@ -332,6 +393,47 @@ export default function StatisticsDashboard() {
     }
 
     const key = activeSection === "demographics" ? selectedStat : activeSection === "loan" ? selectedLoanStat : selectedCollateralStat;
+    // Doughnut chart for Credit Capacity (L1 vs L2)
+    if (key === "creditCapacity") {
+      const cwData = currentData.map((item:any) => ({
+        name: item.level,
+        value: item.percentage,
+      }));
+
+      return (
+        <ResponsiveContainer width="100%" height={360}>
+          <PieChart>
+            <Pie
+              data={cwData}
+              dataKey="value"
+              nameKey="name"
+              cx="40%"
+              cy="50%"
+              innerRadius={60}
+              outerRadius={110}
+              label={({ name, percent }) =>
+                `${name} ${(percent * 100).toFixed(1)}%`
+              }
+            >
+              {cwData.map((_: any, i: number) => (
+                <Cell key={i} fill={COLORS[i % COLORS.length]} />
+              ))}
+            </Pie>
+
+            <Tooltip formatter={(v) => `${v.toFixed(1)}%`} />
+
+            <Legend
+              verticalAlign="middle"
+              align="right"
+              layout="vertical"
+              iconType="circle"
+            />
+          </PieChart>
+        </ResponsiveContainer>
+      );
+
+
+    }
 
     if (key === "loanTypeLimit") {
       const pieData = currentData.flatMap((r: any) => [
@@ -349,6 +451,8 @@ export default function StatisticsDashboard() {
         </ResponsiveContainer>
       );
     }
+
+  
 
     if (key === "submissionRisk") {
       return (
@@ -569,6 +673,7 @@ export default function StatisticsDashboard() {
                   {[
                     { id: "genderRisk" as StatisticType, number: "1", label: "Risk Distribution by Gender" },
                     { id: "regionRisk" as StatisticType, number: "2", label: "Risk Allocation by Region" },
+                    { id: "creditCapacity" as StatisticType, number: "3", label: "Credit Capacity Distribution" },
                   ].map((stat) => {
                     const isSelected = activeSection === "demographics" && selectedStat === stat.id;
                     return (
@@ -656,48 +761,6 @@ export default function StatisticsDashboard() {
                    activeSection === "loan" ? (selectedLoanStat === "loanTypeLimit" ? "Risk by Loan Limit and Type" : selectedLoanStat === "loanPurpose" ? "Risk by Loan Purpose" : "Impact of Special Terms") :
                    activeSection === "collateral" ? (selectedCollateralStat === "occupancyRisk" ? "Risk by Occupancy Type" : "Risk by Submission Method") : ""}
                 </h2>
-                {/* <div className="flex gap-2">
-                  <Dialog open={isFilterOpen} onOpenChange={setIsFilterOpen}>
-                    <DialogTrigger asChild>
-                      <Button variant="outline" size="sm" className="gap-2 bg-transparent">
-                        <Calendar className="h-4 w-4" />
-                        {selectedMonth && selectedYear ? `${availableMonths.find(m => m.value === selectedMonth)?.label} ${selectedYear}` : "Filter by Month/Year"}
-                      </Button>
-                    </DialogTrigger>
-                    <DialogContent className="sm:max-w-md">
-                      <DialogHeader>
-                        <DialogTitle>Filter by Time Period</DialogTitle>
-                        <DialogDescription>Select month and year to view specific data</DialogDescription>
-                      </DialogHeader>
-                      <div className="grid gap-4 py-4">
-                        <div className="grid grid-cols-2 gap-4">
-                          <div>
-                            <label className="text-sm font-medium block mb-2">Year</label>
-                            <Select value={selectedYear?.toString() || ""} onValueChange={(v) => setSelectedYear(Number(v))}>
-                              <SelectTrigger><SelectValue placeholder="Select year" /></SelectTrigger>
-                              <SelectContent>{availableYears.map(y => <SelectItem key={y} value={y.toString()}>{y}</SelectItem>)}</SelectContent>
-                            </Select>
-                          </div>
-                          <div>
-                            <label className="text-sm font-medium block mb-2">Month</label>
-                            <Select value={selectedMonth?.toString() || ""} onValueChange={(v) => { setSelectedMonth(Number(v)); setIsFilterOpen(false); }} disabled={!selectedYear}>
-                              <SelectTrigger><SelectValue placeholder="Select month" /></SelectTrigger>
-                              <SelectContent>{availableMonths.map(m => <SelectItem key={m.value} value={m.value.toString()}>{m.label}</SelectItem>)}</SelectContent>
-                            </Select>
-                          </div>
-                        </div>
-                        {(selectedMonth || selectedYear) && (
-                          <Button variant="ghost" className="text-red-600" onClick={() => { setSelectedMonth(null); setSelectedYear(null); setIsFilterOpen(false); }}>
-                            Clear All Filters
-                          </Button>
-                        )}
-                      </div>
-                    </DialogContent>
-                  </Dialog>
-                  <Button variant="outline" size="sm" className="gap-2 bg-transparent">
-                    <Download className="h-4 w-4" /> Save
-                  </Button>
-                </div> */}
                 <div className="flex gap-2">
 
                   {/* FILTER BUTTON (GIỮ NGUYÊN) */}
