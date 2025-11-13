@@ -9,6 +9,8 @@ from database import Base, engine, get_db, SessionLocal
 from routers import loans
 import models
 import crud
+from fastapi.responses import RedirectResponse
+
 
 
 Base.metadata.create_all(bind=engine)
@@ -90,7 +92,7 @@ def get_dashboard(month: str | None = None, year: int | None = None, db: Session
         }
 
     except Exception as e:
-        print("❌ ERROR in /dashboard:", e)
+        print("ERROR in /dashboard:", e)
         traceback.print_exc()
         return {"error": "Database query failed", "details": str(e)}
 
@@ -116,6 +118,11 @@ def login(username: str, password: str, db: Session = Depends(get_db)):
             "role": user.role
         }
     }
+
+@app.get("/loans")
+async def redirect_loans():
+    return RedirectResponse(url="/loans/")
+
 
 # =========================================================
 # ROUTERS

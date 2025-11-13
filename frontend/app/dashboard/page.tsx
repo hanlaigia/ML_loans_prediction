@@ -91,6 +91,9 @@ const availableYears = Array.from(
 
 export default function StatisticsDashboard() {
   const [isFilterOpen, setIsFilterOpen] = useState(false);
+  const [allData, setAllData] = useState<any[]>([]);
+  const [showAllData, setShowAllData] = useState(false);
+
   const [selectedMonth, setSelectedMonth] = useState<number | null>(null);
   const [selectedYear, setSelectedYear] = useState<number | null>(null);
   const [activeSection, setActiveSection] = useState<SectionType>("demographics");
@@ -101,6 +104,10 @@ export default function StatisticsDashboard() {
   const [rawData, setRawData] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+
+  const [page, setPage] = useState(1);
+  const pageSize = 300;
+
 
   const router = useRouter();
 
@@ -128,6 +135,26 @@ export default function StatisticsDashboard() {
     }
     fetchData();
   }, [selectedMonth, selectedYear]);
+  const handleViewAllData = async () => {
+    try {
+      const res = await fetch(
+        `http://localhost:8000/loans/page?page=${page}&size=${pageSize}`
+      );
+      const data = await res.json();
+
+      setAllData(data);
+      setShowAllData(true);
+    } catch (error) {
+      console.error("Failed to fetch:", error);
+    }
+  };
+  useEffect(() => {
+    if (showAllData) {
+      handleViewAllData();
+    }
+  }, [page]);
+
+
 
   // ÁNH XẠ DỮ LIỆU
   const data = rawData
@@ -345,6 +372,64 @@ export default function StatisticsDashboard() {
       occupancyRisk: "type",
     };
     const nameKey = nameKeyMap[key] || "name";
+
+
+
+    if (showAllData) {
+      return (
+        <div className="p-6">
+          <h2 className="text-xl font-bold mb-4">All Loans (page {page})</h2>
+
+          <Button onClick={() => setShowAllData(false)} className="mb-4">
+            Back to Dashboard
+          </Button>
+
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>ID</TableHead>
+                <TableHead>Month</TableHead>
+                <TableHead>Year</TableHead>
+                <TableHead>Gender</TableHead>
+                <TableHead>Age</TableHead>
+                <TableHead>Region</TableHead>
+                <TableHead>Income</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {allData.map((loan: any) => (
+                <TableRow key={loan.id}>
+                  <TableCell>{loan.id}</TableCell>
+                  <TableCell>{loan.Month}</TableCell>
+                  <TableCell>{loan.Year}</TableCell>
+                  <TableCell>{loan.Gender}</TableCell>
+                  <TableCell>{loan.age}</TableCell>
+                  <TableCell>{loan.Region}</TableCell>
+                  <TableCell>{loan.income}</TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+
+          {/* Pagination */}
+          <div className="flex gap-4 mt-4">
+            <Button
+              disabled={page === 1}
+              onClick={() => setPage(page - 1)}
+            >
+              Previous
+            </Button>
+
+            <Button
+              onClick={() => setPage(page + 1)}
+            >
+              Next
+            </Button>
+          </div>
+
+        </div>
+      );
+    }
 
     return (
       <ResponsiveContainer width="100%" height={300}>
@@ -571,7 +656,7 @@ export default function StatisticsDashboard() {
                    activeSection === "loan" ? (selectedLoanStat === "loanTypeLimit" ? "Risk by Loan Limit and Type" : selectedLoanStat === "loanPurpose" ? "Risk by Loan Purpose" : "Impact of Special Terms") :
                    activeSection === "collateral" ? (selectedCollateralStat === "occupancyRisk" ? "Risk by Occupancy Type" : "Risk by Submission Method") : ""}
                 </h2>
-                <div className="flex gap-2">
+                {/* <div className="flex gap-2">
                   <Dialog open={isFilterOpen} onOpenChange={setIsFilterOpen}>
                     <DialogTrigger asChild>
                       <Button variant="outline" size="sm" className="gap-2 bg-transparent">
@@ -612,6 +697,81 @@ export default function StatisticsDashboard() {
                   <Button variant="outline" size="sm" className="gap-2 bg-transparent">
                     <Download className="h-4 w-4" /> Save
                   </Button>
+                </div> */}
+                <div className="flex gap-2">
+
+                  {/* FILTER BUTTON (GIỮ NGUYÊN) */}
+                  <Dialog open={isFilterOpen} onOpenChange={setIsFilterOpen}>
+                    <DialogTrigger asChild>
+                      <Button variant="outline" size="sm" className="gap-2 bg-transparent">
+                        <Calendar className="h-4 w-4" />
+                        {selectedMonth && selectedYear
+                          ? `${availableMonths.find(m => m.value === selectedMonth)?.label} ${selectedYear}`
+                          : "Filter by Month/Year"}
+                      </Button>
+                    </DialogTrigger>
+
+                    <DialogContent className="sm:max-w-md">
+                      <DialogHeader>
+                        <DialogTitle>Filter by Time Period</DialogTitle>
+                        <DialogDescription>Select month and year to view specific data</DialogDescription>
+                      </DialogHeader>
+
+                      <div className="grid gap-4 py-4">
+                        <div className="grid grid-cols-2 gap-4">
+                          <div>
+                            <label className="text-sm font-medium block mb-2">Year</label>
+                            <Select value={selectedYear?.toString() || ""} onValueChange={(v) => setSelectedYear(Number(v))}>
+                              <SelectTrigger><SelectValue placeholder="Select year" /></SelectTrigger>
+                              <SelectContent>
+                                {availableYears.map(y => (
+                                  <SelectItem key={y} value={y.toString()}>{y}</SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
+                          </div>
+
+                          <div>
+                            <label className="text-sm font-medium block mb-2">Month</label>
+                            <Select
+                              value={selectedMonth?.toString() || ""}
+                              onValueChange={(v) => { setSelectedMonth(Number(v)); setIsFilterOpen(false); }}
+                              disabled={!selectedYear}
+                            >
+                              <SelectTrigger><SelectValue placeholder="Select month" /></SelectTrigger>
+                              <SelectContent>
+                                {availableMonths.map(m => (
+                                  <SelectItem key={m.value} value={m.value.toString()}>{m.label}</SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
+                          </div>
+                        </div>
+
+                        {(selectedMonth || selectedYear) && (
+                          <Button
+                            variant="ghost"
+                            className="text-red-600"
+                            onClick={() => { setSelectedMonth(null); setSelectedYear(null); setIsFilterOpen(false); }}
+                          >
+                            Clear All Filters
+                          </Button>
+                        )}
+                      </div>
+
+                    </DialogContent>
+                  </Dialog>
+
+                  {/* NEW BUTTON — VIEW ALL DATA */}
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="gap-2 bg-transparent"
+                    onClick={() => router.push("/all-data")}
+                  >
+                    View All Data
+                  </Button>
+
                 </div>
               </CardContent>
             </Card>

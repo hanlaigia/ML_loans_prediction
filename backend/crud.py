@@ -192,7 +192,19 @@ def create_loan(db: Session, loan: schemas.LoanCreate):
 
     allowed_columns = {col.name for col in models.Loan.__table__.columns}
     filtered_data = {k: v for k, v in loan_data.items() if k in allowed_columns}
+    # CHUẨN HÓA GENDER 
+    if "Gender" in filtered_data:
+        g = str(filtered_data["Gender"]).lower()
+        if "male" in g:
+            filtered_data["Gender"] = "Male"
+        elif "female" in g:
+            filtered_data["Gender"] = "Female"
+        else:
+            filtered_data["Gender"] = "Sex Not Av"
 
+    # Ghi nhận Month/Year hiện tại vào CSDL
+    filtered_data["Month"] = datetime.now().strftime("%B")
+    filtered_data["Year"] = datetime.now().year
     # Ghi nhận Month/Year hiện tại vào CSDL
     filtered_data["Month"] = datetime.now().strftime("%B")  # VD: "September"
     filtered_data["Year"] = datetime.now().year
@@ -216,16 +228,6 @@ def create_loan(db: Session, loan: schemas.LoanCreate):
     db.add(db_loan)
     db.commit()
     db.refresh(db_loan)
-
-    # Chuyển đổi lại để hiển thị CF/NCF
-    if hasattr(db_loan, "loan_limit") and isinstance(db_loan.loan_limit, (int, float)):
-        val = db_loan.loan_limit
-        if val == 0 or val == 0.0:
-            db_loan.loan_limit = "ncf"
-        elif val >= 500000:
-            db_loan.loan_limit = "cf"
-        else:
-            db_loan.loan_limit = str(val)
 
     return db_loan
 
@@ -370,3 +372,5 @@ def get_empty_data():
 
 def get_user_by_username(db: Session, username: str):
     return db.query(models.Employee).filter(models.Employee.username == username).first()
+def get_loans(db: Session):
+    return db.query(models.Loan).all()
