@@ -84,7 +84,7 @@ const currentYear = new Date().getFullYear();
 
 
 const availableYears = Array.from(
-  { length: currentYear - 2000 + 1 },
+  { length: currentYear - 2015 + 1 },
   (_, i) => currentYear - i
 );
 
@@ -402,38 +402,73 @@ export default function StatisticsDashboard() {
       <main className="container mx-auto px-4 py-6">
         {/* KPI */}
         <div className="grid grid-cols-1 md:grid-cols-5 gap-4 mb-6">
-          <Card className="bg-card/100 backdrop-blur-md">
-            <CardContent className="pt-6 flex items-center justify-between">
-              <div><p className="text-sm text-muted-foreground">Total Active Loans</p><p className="text-2xl font-bold text-foreground">{data.total_active_loans.toLocaleString()}</p></div>
-              <CreditCard className="h-8 w-8 text-primary" />
-            </CardContent>
-          </Card>
-          <Card className="bg-card/100 backdrop-blur-md">
-            <CardContent className="pt-6 flex items-center justify-between">
-              <div><p className="text-sm text-muted-foreground">Avg Overdue Rate</p><p className="text-2xl font-bold text-foreground">{formatPercent(data.overdue_rate, 1)}</p></div>
-              <Percent className="h-8 w-8 text-orange-500" />
-            </CardContent>
-          </Card>
-          <Card className="bg-card/100 backdrop-blur-md">
-            <CardContent className="pt-6 flex items-center justify-between">
-              <div><p className="text-sm text-muted-foreground">Total Overdue Amount</p><p className="text-2xl font-bold text-foreground">{formatCurrency(data.overdue_amount)}</p></div>
-              <DollarSign className="h-8 w-8 text-destructive" />
-            </CardContent>
-          </Card>
-          <Card className="bg-card/100 backdrop-blur-md">
-            <CardContent className="pt-6 flex items-center justify-between">
-              <div><p className="text-sm text-muted-foreground">Recovery Rate</p><p className="text-2xl font-bold text-foreground">{formatPercent(data.recovery_rate, 1)}</p></div>
-              <TrendingUp className="h-8 w-8 text-green-500" />
-            </CardContent>
-          </Card>
-          <Card className="bg-card/100 backdrop-blur-md">
-            <CardContent className="pt-6 flex items-center justify-between">
-              <div><p className="text-sm text-muted-foreground">Model Accuracy</p><p className="text-2xl font-bold text-foreground">{formatPercent(data.model_accuracy, 1)}</p></div>
-              <CheckCircle className="h-8 w-8 text-green-500" />
-            </CardContent>
-          </Card>
-        </div>
 
+          {/* Total Active Loans */}
+          <Card className="bg-card/100 backdrop-blur-md">
+            <CardContent className="pt-6 flex items-center justify-between">
+              <div className="flex flex-col items-center justify-center text-center w-full">
+                <p className="text-sm text-muted-foreground">Total Active Loans</p>
+                <p className="text-2xl font-bold text-foreground">
+                  {data.total_active_loans.toLocaleString()}
+                </p>
+              </div>
+              <CreditCard className="h-8 w-8 text-primary ml-4" />
+            </CardContent>
+          </Card>
+
+          {/* Avg Overdue Rate */}
+          <Card className="bg-card/100 backdrop-blur-md">
+            <CardContent className="pt-6 flex items-center justify-between">
+              <div className="flex flex-col items-center justify-center text-center w-full">
+                <p className="text-sm text-muted-foreground">Avg Overdue Rate</p>
+                <p className="text-2xl font-bold text-foreground">
+                  {formatPercent(data.overdue_rate, 1)}
+                </p>
+              </div>
+              <Percent className="h-8 w-8 text-orange-500 ml-4" />
+            </CardContent>
+          </Card>
+
+          {/* Total Overdue Amount */}
+          <Card className="bg-card/100 backdrop-blur-md">
+            <CardContent className="pt-6 flex items-center justify-between">
+              <div className="flex flex-col items-center justify-center text-center w-full">
+                <p className="text-sm text-muted-foreground">Total Overdue Amount</p>
+                <p className="text-2xl font-bold text-foreground">
+                  {formatCurrency(data.overdue_amount)}
+                </p>
+              </div>
+              <DollarSign className="h-8 w-8 text-destructive ml-4" />
+            </CardContent>
+          </Card>
+
+          {/* Recovery Rate */}
+          <Card className="bg-card/100 backdrop-blur-md">
+            <CardContent className="pt-6 flex items-center justify-between">
+              <div className="flex flex-col items-center justify-center text-center w-full">
+                <p className="text-sm text-muted-foreground">Recovery Rate</p>
+                <p className="text-2xl font-bold text-foreground">
+                  {formatPercent(data.recovery_rate, 1)}
+                </p>
+              </div>
+              <TrendingUp className="h-8 w-8 text-green-500 ml-4" />
+            </CardContent>
+          </Card>
+
+          {/* Model Accuracy */}
+          <Card className="bg-card/100 backdrop-blur-md">
+            <CardContent className="pt-6 flex items-center justify-between">
+              <div className="flex flex-col items-center justify-center text-center w-full">
+                <p className="text-sm text-muted-foreground">Model Accuracy</p>
+                <p className="text-2xl font-bold text-foreground">
+                  {formatPercent(data.model_accuracy, 1)}
+                </p>
+              </div>
+              <CheckCircle className="h-8 w-8 text-green-500 ml-4" />
+            </CardContent>
+          </Card>
+
+        </div>
         {/* MAIN GRID */}
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
           {/* LEFT PANELS */}
