@@ -34,25 +34,6 @@ export default function LoginPage() {
     language: "English",
   }
 
-  // const handleSubmit = async (e: React.FormEvent) => {
-  //   e.preventDefault()
-  //   setError("")
-  //   setLoading(true)
-  //   try {
-  //     // Sample login: admin/admin
-  //     if (username === "admin" && password === "admin") {
-  //       if (typeof window !== "undefined") {
-  //         localStorage.setItem("isLoggedIn", "true")
-  //         if (remember) localStorage.setItem("remember", "true")
-  //       }
-  //       router.replace("/")
-  //     } else {
-  //       setError(t.error)
-  //     }
-  //   } finally {
-  //     setLoading(false)
-  //   }
-  // }
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
