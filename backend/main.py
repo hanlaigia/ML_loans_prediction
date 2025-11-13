@@ -3,11 +3,13 @@ from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.orm import Session
 from sqlalchemy import text
 import traceback
+from fastapi import HTTPException
 
 from database import Base, engine, get_db, SessionLocal
 from routers import loans
 import models
 import crud
+
 
 Base.metadata.create_all(bind=engine)
 
@@ -92,7 +94,32 @@ def get_dashboard(month: str | None = None, year: int | None = None, db: Session
         traceback.print_exc()
         return {"error": "Database query failed", "details": str(e)}
 
+
+@app.post("/login")
+def login(username: str, password: str, db: Session = Depends(get_db)):
+    user = crud.get_user_by_username(db, username)
+
+    if not user:
+        raise HTTPException(status_code=401, detail="Invalid username or password")
+
+    # so sánh mật khẩu
+    if user.password != password:
+        raise HTTPException(status_code=401, detail="Invalid username or password")
+
+    return {
+        "message": "Login success",
+        "user": {
+            "id": user.id,
+            "employee_code": user.employee_code,
+            "username": user.username,
+            "full_name": user.full_name,
+            "role": user.role
+        }
+    }
+
 # =========================================================
 # ROUTERS
 # =========================================================
 app.include_router(loans.router)
+
+

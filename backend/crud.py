@@ -64,6 +64,7 @@ def create_loan(db: Session, loan: schemas.LoanCreate):
 
 
 
+
 def safe_limit(val):
     """Chuyển giá trị loan_limit về float an toàn"""
     try:
@@ -168,3 +169,5 @@ def get_empty_data():
 
 
 
+def get_user_by_username(db: Session, username: str):
+    return db.query(models.Employee).filter(models.Employee.username == username).first()

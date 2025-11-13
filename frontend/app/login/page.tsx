@@ -1,13 +1,11 @@
 "use client"
 
-
 import { useState } from "react"
 import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-
 
 export default function LoginPage() {
   const [username, setUsername] = useState("")
@@ -16,82 +14,75 @@ export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false)
   const [remember, setRemember] = useState(false)
   const [loading, setLoading] = useState(false)
-  const [lang, setLang] = useState<'vi' | 'en'>('vi')
   const router = useRouter()
 
-
-
-
-  const translations = {
-    vi: {
-      title: "Đăng nhập",
-      subtitle: "Truy cập hệ thống dự đoán rủi ro",
-      usernameLabel: "Tài khoản",
-      passwordLabel: "Mật khẩu",
-      remember: "Nhớ tôi",
-      forgot: "Quên mật khẩu?",
-      submit: "Đăng nhập",
-      processing: "Đang xử lý…",
-      or: "hoặc",
-      terms: "Điều khoản",
-      privacy: "Bảo mật",
-      error: "Sai tài khoản hoặc mật khẩu",
-      toggleEye: "Hiện mật khẩu",
-      hideEye: "Ẩn mật khẩu",
-      language: "Tiếng Việt",
-    },
-    en: {
-      title: "Sign In",
-      subtitle: "Access to risk prediction system",
-      usernameLabel: "Username",
-      passwordLabel: "Password",
-      remember: "Remember me",
-      forgot: "Forgot password?",
-      submit: "Sign In",
-      processing: "Processing…",
-      or: "or",
-      terms: "Terms",
-      privacy: "Privacy",
-      error: "Invalid username or password",
-      toggleEye: "Show password",
-      hideEye: "Hide password",
-      language: "English",
-    }
-  } as const
-
-
-  const t = translations[lang]
-
-
-  const toggleLanguage = () => {
-    setLang((prevLang) => (prevLang === 'vi' ? 'en' : 'vi'))
+  const t = {
+    title: "Sign In",
+    subtitle: "Access to risk prediction system",
+    usernameLabel: "Username",
+    passwordLabel: "Password",
+    remember: "Remember me",
+    forgot: "Forgot password?",
+    submit: "Sign In",
+    processing: "Processing…",
+    or: "or",
+    terms: "Terms",
+    privacy: "Privacy",
+    error: "Invalid username or password",
+    toggleEye: "Show password",
+    hideEye: "Hide password",
+    language: "English",
   }
 
-
+  // const handleSubmit = async (e: React.FormEvent) => {
+  //   e.preventDefault()
+  //   setError("")
+  //   setLoading(true)
+  //   try {
+  //     // Sample login: admin/admin
+  //     if (username === "admin" && password === "admin") {
+  //       if (typeof window !== "undefined") {
+  //         localStorage.setItem("isLoggedIn", "true")
+  //         if (remember) localStorage.setItem("remember", "true")
+  //       }
+  //       router.replace("/")
+  //     } else {
+  //       setError(t.error)
+  //     }
+  //   } finally {
+  //     setLoading(false)
+  //   }
+  // }
   const handleSubmit = async (e: React.FormEvent) => {
-  e.preventDefault()
-  setError("")
-  setLoading(true)
-  try {
-    // Đăng nhập mẫu: admin/admin
-    if (username === "admin" && password === "admin") {
-      if (typeof window !== "undefined") {
-        localStorage.setItem("isLoggedIn", "true")
-        // lưu “nhớ tôi” nếu cần
-        if (remember) localStorage.setItem("remember", "true")
+    e.preventDefault();
+    setError("");
+    setLoading(true);
+
+    try {
+      const res = await fetch("http://localhost:8000/login?username=" + username + "&password=" + password, {
+        method: "POST",
+      });
+
+      if (!res.ok) {
+        setError("Invalid username or password");
+        return;
       }
-      router.replace("/")
-    } else {
-      setError(t.error)
+
+      const data = await res.json();
+
+      if (typeof window !== "undefined") {
+        localStorage.setItem("isLoggedIn", "true");
+        localStorage.setItem("user", JSON.stringify(data.user));
+        if (remember) localStorage.setItem("remember", "true");
+      }
+
+      router.replace("/");
+    } catch (err) {
+      setError("Server error");
+    } finally {
+      setLoading(false);
     }
-  } finally {
-    setLoading(false)
-  }
-}
-
-
-
-
+  };
 
 
   return (  
@@ -111,10 +102,10 @@ export default function LoginPage() {
       <style jsx>{`
         @keyframes diagonalFlow {
           0% {
-            background-position: 0% 100%; /* Bắt đầu từ top-right */
+            background-position: 0% 100%; /* Start from top-right */
           }
           100% {
-            background-position: 100% 0%; /* Di chuyển đến bottom-left, loop seamless */
+            background-position: 100% 0%; /* Move to bottom-left, seamless loop */
           }
         }
       `}</style>  
@@ -122,7 +113,6 @@ export default function LoginPage() {
       <Card className="relative w-full max-w-sm p-8 bg-white/100 backdrop-blur-md shadow-xl border border-slate-200/70">
         {/* Accent bar */}
         <div className="absolute -top-[1px] left-0 right-0 h-1 rounded-t-[10px] bg-gradient-to-r from-sky-400 via-blue-500 to-indigo-500" />
-
 
         {/* Accent bar bottom */}
         <div className="absolute -bottom-[1px] left-0 right-0 h-1 rounded-b-[10px] bg-gradient-to-r from-indigo-500 via-blue-500 to-sky-400" />
@@ -133,8 +123,6 @@ export default function LoginPage() {
         {/* Accent bar right */}
         <div className="absolute -right-[1px] top-0 bottom-0 w-1 rounded-r-[10px] bg-gradient-to-b from-indigo-500 via-blue-500 to-sky-400" />
 
-
-        {/* --- Header + Form giữ nguyên ở đây --- */}
         {/* Header */}
         <div className="mb-6 text-center">
           <div className="mx-auto mb-3 h-10 w-10 rounded-full bg-sky-100 flex items-center justify-center animate-pulse [animation-delay:1s]">
@@ -145,13 +133,12 @@ export default function LoginPage() {
         </div>
        
         <form onSubmit={handleSubmit} autoComplete="off" className="space-y-4">
-          {/* Error tổng (nếu có) */}
+          {/* General error */}
           {error && (
             <div className="rounded-md border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">
               {error}
             </div>
           )}
-
 
           {/* Username */}
           <div className="space-y-1.5">
@@ -167,7 +154,7 @@ export default function LoginPage() {
                 autoComplete="username"
                 className="pl-9"
               />
-              {/* icon bên trái */}
+              {/* Left icon */}
               <svg className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 drop-shadow-sm" viewBox="0 0 24 24" fill="none">
                 <defs>
                   <linearGradient id="userGrad" x1="0%" y1="0%" x2="100%" y2="100%">
@@ -184,12 +171,9 @@ export default function LoginPage() {
                 </g>
               </svg>
             </div>
-            {/* gợi ý lỗi inline (nếu cần) */}
-            {/* {usernameError && <p className="text-xs text-red-600">{usernameError}</p>} */}
           </div>
 
-
-          {/* Password với toggle */}
+          {/* Password with toggle */}
           <div className="space-y-1.5">
             <Label htmlFor="password">{t.passwordLabel}</Label>
             <div className="relative">
@@ -202,9 +186,7 @@ export default function LoginPage() {
                 autoComplete="current-password"
                 className="pr-10 pl-9"
               />
-              {/* icon lock trái */}
-
-
+              {/* Left lock icon */}
               <svg className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 drop-shadow-sm" viewBox="0 0 24 24" fill="none">
                 <defs>
                   <linearGradient id="lockGrad" x1="0%" y1="0%" x2="100%" y2="100%">
@@ -221,12 +203,7 @@ export default function LoginPage() {
                 </g>
               </svg>
 
-
-              {/* <svg className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" viewBox="0 0 24 24" fill="none">
-                <rect x="4" y="11" width="16" height="9" rx="2" stroke="currentColor" strokeWidth="2"/>
-                <path d="M8 11V7a4 4 0 1 1 8 0v4" stroke="currentColor" strokeWidth="2"/>
-              </svg> */}
-              {/* toggle eye phải */}
+              {/* Right eye toggle */}
               <button
                 type="button"
                 onClick={() => setShowPassword((s) => !s)}
@@ -251,7 +228,6 @@ export default function LoginPage() {
             </div>
           </div>
 
-
           {/* Remember + Forgot */}
           <div className="flex items-center justify-between">
             <label className="flex items-center gap-2 text-sm text-slate-700">
@@ -260,7 +236,6 @@ export default function LoginPage() {
             </label>
             <a href="/forgot-password" className="text-sm text-sky-600 hover:underline">{t.forgot}</a>
           </div>
-
 
           {/* Submit */}
           <Button
@@ -281,26 +256,12 @@ export default function LoginPage() {
             )}
           </Button>
 
-
-          {/* Footer nhỏ */}
+          {/* Small footer */}
           <div className="text-center text-xs text-slate-500">
             <a href="/terms" className="hover:underline">{t.terms}</a> · <a href="/privacy" className="hover:underline">{t.privacy}</a>
           </div>
-
-
-          {/* Ngôn ngữ (tuỳ chọn) */}
-          <button
-            type="button"
-            onClick={toggleLanguage}
-            className="mx-auto block text-xs text-slate-500 hover:underline transition-colors"
-          >
-            {translations[lang === 'vi' ? 'en' : 'vi'].language}
-          </button>
-
-
         </form>
       </Card>
     </div>
   )
 }
-
