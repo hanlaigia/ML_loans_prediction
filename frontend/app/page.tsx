@@ -347,7 +347,7 @@ export default function LoanPredictFullUI() {
               <CardTitle className="text-lg">
                 1. Enter Loan Application Data
               </CardTitle>
-              <CardDescription>
+              <CardDescription className="italic">
                 Fill in all fields for accurate prediction
               </CardDescription>
             </CardHeader>
@@ -1024,7 +1024,7 @@ export default function LoanPredictFullUI() {
               <CardTitle className="text-lg">
                 2. Generate Prediction
               </CardTitle>
-              <CardDescription>
+              <CardDescription className="italic">
                 Run the ML model to predict default risk
               </CardDescription>
             </CardHeader>
@@ -1103,7 +1103,7 @@ export default function LoanPredictFullUI() {
           <Card className="bg-card/90 backdrop-blur-md">
             <CardHeader>
               <CardTitle className="text-lg">3. Actions</CardTitle>
-              <CardDescription>
+              <CardDescription className="italic">
                 Save, export, or clear the prediction
               </CardDescription>
             </CardHeader>

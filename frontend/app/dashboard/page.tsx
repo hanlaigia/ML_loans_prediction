@@ -442,7 +442,7 @@ export default function StatisticsDashboard() {
             <Card className="bg-card/100 backdrop-blur-md">
               <CardHeader className="pb-0">
                 <CardTitle className="text-sm">Demographics Overview</CardTitle>
-                <CardDescription className="text-xs">Select a statistic</CardDescription>
+                <CardDescription className="text-xs italic">Select a statistic</CardDescription>
               </CardHeader>
               <CardContent className="pt-0 mt-[-4px]">
                 <div className="space-y-1">
@@ -471,7 +471,7 @@ export default function StatisticsDashboard() {
             <Card className="bg-card/100 backdrop-blur-md">
               <CardHeader className="pb-0">
                 <CardTitle className="text-sm">Loan Characteristics</CardTitle>
-                <CardDescription className="text-xs">Select a statistic</CardDescription>
+                <CardDescription className="text-xs italic">Select a statistic</CardDescription>
               </CardHeader>
               <CardContent className="pt-0 mt-[-4px]">
                 <div className="space-y-1">
@@ -501,7 +501,7 @@ export default function StatisticsDashboard() {
             <Card className="bg-card/100 backdrop-blur-md">
               <CardHeader className="pb-0">
                 <CardTitle className="text-sm">Collateral and Application</CardTitle>
-                <CardDescription className="text-xs">Select a statistic</CardDescription>
+                <CardDescription className="text-xs italic">Select a statistic</CardDescription>
               </CardHeader>
               <CardContent className="pt-0 mt-[-4px]">
                 <div className="space-y-1">
