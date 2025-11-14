@@ -2,8 +2,6 @@
 
 import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
-
-// Import individual components
 import { Button } from "@/components/ui/button"
 import {
   Card,
@@ -37,9 +35,9 @@ import {
   LogOut,
 } from "lucide-react"
 
-/* ============================================================= */
-/* 1. MAPPINGS – Short code → Full name (UI display)            */
-/* ============================================================= */
+
+// 1. MAPPINGS – Short code → Full name (UI display) 
+
 const mappings = {
   loan_limit: { cf: "Conforming", ncf: "Non-conforming" },
   approv_in_adv: { pre: "Pre-approved", nopre: "Not Pre-approved" },
@@ -94,9 +92,9 @@ const genderMapping = {
   "sex not available": "Sex Not Available",
 }
 
-/* ============================================================= */
-/* 2. AGE MAPPING – Age group → Average value                   */
-/* ============================================================= */
+
+// 2. AGE MAPPING – Age group → Average value 
+
 const ageGroupToValue: Record<string, number> = {
   "<25": 20,
   "25-34": 29.5,
@@ -117,30 +115,6 @@ const ageValueToGroup = (value: number): string => {
   return ">74"
 }
 
-/* ============================================================= */
-/* 3. MAIN COMPONENT                                            */
-/* ============================================================= */
-// export default function LoanPredictFullUI() {
-//   const router = useRouter()
-//   // Redirect immediately if not logged in
-//   if (typeof window !== "undefined") {
-//     const isLoggedIn = localStorage.getItem("isLoggedIn")
-//     if (!isLoggedIn) {
-//       router.replace("/login")
-//       return null
-//     }
-//   }
-
-
-
-//   /* ------------------- Authentication ------------------- */
-//   useEffect(() => {
-//     const isLoggedIn = localStorage.getItem("isLoggedIn")
-//     if (!isLoggedIn) {
-//       router.replace("/login")
-//     }
-//   }, [])
-
 export default function LoanPredictFullUI() {
   const router = useRouter()
 
@@ -151,7 +125,7 @@ export default function LoanPredictFullUI() {
     }
   }, [])
 
-    /* ------------------- NEW: Fetch Dashboard Data ------------------- */
+//  NEW: Fetch Dashboard Data
   const [dashboardData, setDashboardData] = useState<any>(null)
 
   useEffect(() => {
@@ -171,7 +145,7 @@ export default function LoanPredictFullUI() {
 
   const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000"
 
-  /* ------------------- Form State – COMPLETELY EMPTY ------------------- */
+// -------- Form State – COMPLETELY EMPTY ---------
   const [form, setForm] = useState({
     loan_limit: "",
     Gender: "",
@@ -213,7 +187,7 @@ export default function LoanPredictFullUI() {
     setForm((prev) => ({ ...prev, [key]: value }))
   }
 
-  /* ------------------- Predict ------------------- */
+  // /------------------- Predict ------------
   const handlePredict = async () => {
     // Required fields validation
     const required = ["Gender", "age", "income", "loan_amount", "term", "rate_of_interest"]
@@ -253,7 +227,7 @@ export default function LoanPredictFullUI() {
     }
   }
 
-  /* ------------------- Save ------------------- */
+// ----------------- Save -------------
   const handleSave = async () => {
     if (!result) return alert("Please predict first!")
     try {
@@ -319,7 +293,7 @@ export default function LoanPredictFullUI() {
     router.push("/login")
   }
 
-  /* ------------------- Render ------------------- */
+  // ------------------- Render -------------------
   return (
     <div className="min-h-dvh bg-transparent">
       {/* Header */}
@@ -394,7 +368,7 @@ export default function LoanPredictFullUI() {
                       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 pt-2">
                         {/* Gender – FIXED */}
                         <div className="space-y-2">
-                          <Label htmlFor="gender">Gender *</Label>
+                          <Label htmlFor="gender">Gender</Label>
                           <Select
                             value={form.Gender}
                             onValueChange={(v) => handleChange("Gender", v)}
@@ -414,7 +388,7 @@ export default function LoanPredictFullUI() {
 
                         {/* Age */}
                         <div className="space-y-2">
-                          <Label htmlFor="age">Age *</Label>
+                          <Label htmlFor="age">Age</Label>
                           <Select
                             value={form.age ? ageValueToGroup(form.age) : ""}
                             onValueChange={(v) =>
@@ -524,7 +498,7 @@ export default function LoanPredictFullUI() {
                     <fieldset className="rounded-2xl border border-border/100 bg-card/60 backdrop-blur p-4 md:p-6 shadow-sm">
                       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 pt-2">
                         <div className="space-y-2">
-                          <Label htmlFor="income">Income *</Label>
+                          <Label htmlFor="income">Income</Label>
                           <Input
                             id="income"
                             type="number"
@@ -713,7 +687,7 @@ export default function LoanPredictFullUI() {
                         </div>
 
                         <div className="space-y-2">
-                          <Label htmlFor="loan-amount">Loan Amount *</Label>
+                          <Label htmlFor="loan-amount">Loan Amount</Label>
                           <Input
                             id="loan-amount"
                             type="number"
@@ -729,7 +703,7 @@ export default function LoanPredictFullUI() {
                         </div>
 
                         <div className="space-y-2">
-                          <Label htmlFor="term">Term (months) *</Label>
+                          <Label htmlFor="term">Term (months)</Label>
                           <Input
                             id="term"
                             type="number"
@@ -743,7 +717,7 @@ export default function LoanPredictFullUI() {
 
                         <div className="space-y-2">
                           <Label htmlFor="rate-of-interest">
-                            Rate of Interest (%) *
+                            Rate of Interest (%) 
                           </Label>
                           <Input
                             id="rate-of-interest"

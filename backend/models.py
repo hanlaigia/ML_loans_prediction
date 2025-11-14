@@ -38,17 +38,15 @@ class Loan(Base):
     prediction = Column(Integer, nullable=True)
     probability = Column(Float, nullable=True)
 
-
-# ============================
 # Employee Model for Login
-# ============================
+
 class Employee(Base):
     __tablename__ = "employees"
 
     id = Column(Integer, primary_key=True, autoincrement=True)
     employee_code = Column(String(20), unique=True, nullable=False)
     username = Column(String(50), unique=True, nullable=False)
-    password = Column(String(50), nullable=True)  # bạn đang để plaintext
+    password = Column(String(50), nullable=True) 
     full_name = Column(String(100))
     email = Column(String(100))
     phone = Column(String(20))

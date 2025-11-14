@@ -221,7 +221,7 @@ def get_dashboard_data(db: Session, month: str = None, year: int = None):
             "occupancy_risk": group_rate(lambda x: x.occupancy_type),
             "submission_risk": group_rate(lambda x: x.submission_of_application),
             "credit_capacity": credit_capacity_dist,
-            "model_accuracy": 90.4,
+            "model_accuracy": 93.4,
         }
         
 
@@ -245,7 +245,7 @@ def get_empty_data():
         "special_terms": [],
         "occupancy_risk": [],
         "submission_risk": [],
-        "model_accuracy": 90.4,
+        "model_accuracy": 93.4,
     }
 
 

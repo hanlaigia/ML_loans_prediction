@@ -6,17 +6,7 @@ from model_loader import predict as model_predict
 import crud
 router = APIRouter(prefix="/loans", tags=["Loans"])
 
-
-
-# API phân trang
-# @router.get("/page", response_model=list[schemas.LoanResponse])
-# def read_loans_page(
-#     page: int = 1,
-#     size: int = 100,
-#     db: Session = Depends(get_db)
-# ):
-#     offset = (page - 1) * size
-#     return db.query(models.Loan).offset(offset).limit(size).all()
+#API lấy danh sách loans với phân trang và lọc
 @router.get("/page", response_model=list[schemas.LoanResponse])
 def read_loans_page(
     page: int = 1,

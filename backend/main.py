@@ -29,13 +29,10 @@ app.add_middleware(
 def root():
     return {"message": "Backend connected successfully"}
 
-# =========================================================
-# 🧩 DASHBOARD ROUTE — THỐNG KÊ TỪ BẢNG loan_prediction.loans
-# =========================================================
+#DASHBOARD ROUTE — THỐNG KÊ TỪ BẢNG loan_prediction.loans
 @app.get("/dashboard")
 def get_dashboard(month: str | None = None, year: int | None = None, db: Session = Depends(get_db)):
     try:
-        # 1️⃣ Xây where clause an toàn
         conditions = ["1=1"]
         params = {}
         if month:
@@ -47,7 +44,6 @@ def get_dashboard(month: str | None = None, year: int | None = None, db: Session
 
         where_clause = " AND ".join(conditions)
 
-        # 2️⃣ Thực thi các truy vấn thống kê chính
         with db.begin():
             total_loans = db.execute(
                 text(f"SELECT COUNT(*) FROM loan_prediction.loans WHERE {where_clause}"), params
@@ -73,7 +69,7 @@ def get_dashboard(month: str | None = None, year: int | None = None, db: Session
             ).scalar() or 0.0
         avg_overdue_rate = round(avg_overdue_rate, 2)
 
-        # 3️⃣ Gọi CRUD với session riêng để tránh rollback toàn bộ
+        # Gọi CRUD với session riêng để tránh rollback toàn bộ
         crud_data = {}
         try:
             with SessionLocal() as local_db:
@@ -82,7 +78,7 @@ def get_dashboard(month: str | None = None, year: int | None = None, db: Session
             print("⚠️ Warning: get_dashboard_data() failed, ignoring CRUD stats")
             print(e)
 
-        # 4️⃣ Trả kết quả JSON
+        # Trả kết quả JSON
         return {
             "total_loans": total_loans,
             "total_active_loans": total_active_loans,
@@ -123,10 +119,6 @@ def login(username: str, password: str, db: Session = Depends(get_db)):
 async def redirect_loans():
     return RedirectResponse(url="/loans/")
 
-
-# =========================================================
-# ROUTERS
-# =========================================================
 app.include_router(loans.router)
 
 

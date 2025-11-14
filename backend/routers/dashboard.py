@@ -8,7 +8,7 @@ router = APIRouter(prefix="/dashboard", tags=["Dashboard"])
 @router.get("/")
 def get_dashboard(month: str = None, year: int = None, db: Session = Depends(get_db)):
     data = crud.get_dashboard_data(db, month, year)
-    data["model_accuracy"] = 90.14  # cố định
+    data["model_accuracy"] = 93.4 
     return data
 @router.get("/filters")
 def get_filters(db: Session = Depends(get_db)):
