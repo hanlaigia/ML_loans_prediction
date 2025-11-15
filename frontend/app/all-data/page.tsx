@@ -1,9 +1,15 @@
 "use client";
 
+
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from "@/components/ui/table";
 import { useRouter } from "next/navigation";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+
 
 export default function AllDataPage() {
   const [isReady, setIsReady] = useState(false);
@@ -16,11 +22,14 @@ export default function AllDataPage() {
   const [sortOrder, setSortOrder] = useState("");
   const pageSize = 100;
 
+
   const router = useRouter();
+
 
   useEffect(() => {
     setIsReady(true);
   }, []);
+
 
   const fetchData = async (extraParams: any = {}) => {
     const params = new URLSearchParams();
@@ -35,9 +44,11 @@ export default function AllDataPage() {
     setData(json);
   };
 
+
   useEffect(() => {
     if (isReady) fetchData();
   }, [page, isReady]);
+
 
   const toggleSelect = (id: number) => {
     setSelected(prev =>
@@ -45,17 +56,22 @@ export default function AllDataPage() {
     );
   };
 
+
   const deleteSelected = async () => {
     if (!selected.length) return;
 
+
     const confirmed = window.confirm(`Delete ${selected.length} record(s)?`);
     if (!confirmed) return;
+
 
     for (const id of selected) {
       await fetch(`http://localhost:8000/loans/${id}`, { method: "DELETE" });
     }
 
+
     alert("Deleted successfully!");
+
 
     setSelected([]);
     fetchData();
@@ -71,6 +87,7 @@ export default function AllDataPage() {
     });
   };
 
+
   const reload = () => {
     setFilterId("");
     setYear("");
@@ -79,147 +96,220 @@ export default function AllDataPage() {
     fetchData();
   };
 
+
   if (!isReady) return null;
 
+
   return (
-    <div className="p-6">
-      <h1 className="text-3xl font-bold mb-6 text-center">All Loans Data (Page {page})</h1>
+    <div className="min-h-screen bg-gray-50/30 p-6">
+      <div className="max-w-[100%] mx-auto">
+        {/* Header - Đã sửa: căn giữa và bỏ chú thích */}
+        <div className="mb-8 text-center">
+          <h1 className="text-3xl font-bold text-gray-900">All Loans Data</h1>
+        </div>
 
-      <div className="flex justify-between mb-4">
-        <div className="flex gap-4">
-          <input
-            type="text"
-            placeholder="Find by ID"
-            value={filterId}
-            onChange={(e) => setFilterId(e.target.value)}
-            className="border p-2 bg-white"
-          />
-          <input
-            type="text"
-            placeholder="Year"
-            value={year}
-            onChange={(e) => setYear(e.target.value)}
-            className="border p-2 bg-white"
-          />
-          <input
-            type="text"
-            placeholder="Month"
-            value={month}
-            onChange={(e) => setMonth(e.target.value)}
-            className="border p-2 bg-white"
-          />
-          <select
-            value={sortOrder}
-            onChange={(e) => setSortOrder(e.target.value)}
-            className="border p-2 bg-white"
+
+        {/* Filters Card */}
+        <Card className="mb-6 p-3 pt-1">
+          <div className="px-6 pt-4 pb-1">
+            <h2 className="text-lg font-semibold">Filters & Search</h2>
+          </div>
+
+          <CardContent>
+            <div className="grid grid-cols-1 lg:grid-cols-5 gap-4 mb-4">
+              {/* Find by ID */}
+              <div className="space-y-2">
+                <Label htmlFor="filterId" className="text-sm font-medium">Find by ID</Label>
+                <Input
+                  id="filterId"
+                  type="text"
+                  placeholder="Enter loan ID..."
+                  value={filterId}
+                  onChange={(e) => setFilterId(e.target.value)}
+                  className="w-full"
+                />
+              </div>
+
+
+              {/* Year */}
+              <div className="space-y-2">
+                <Label htmlFor="year" className="text-sm font-medium">Year</Label>
+                <Input
+                  id="year"
+                  type="text"
+                  placeholder="Enter year..."
+                  value={year}
+                  onChange={(e) => setYear(e.target.value)}
+                  className="w-full"
+                />
+              </div>
+
+
+              {/* Month */}
+              <div className="space-y-2">
+                <Label htmlFor="month" className="text-sm font-medium">Month</Label>
+                <Input
+                  id="month"
+                  type="text"
+                  placeholder="Enter month..."
+                  value={month}
+                  onChange={(e) => setMonth(e.target.value)}
+                  className="w-full"
+                />
+              </div>
+
+
+              {/* Sort ID */}
+              <div className="space-y-2">
+                <Label htmlFor="sortOrder" className="text-sm font-medium">Sort ID</Label>
+                <Select value={sortOrder} onValueChange={setSortOrder}>
+                  <SelectTrigger className="w-full">
+                    <SelectValue placeholder="Select sort order" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="asc">ID Ascending</SelectItem>
+                    <SelectItem value="desc">ID Descending</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+
+              {/* Action Buttons */}
+              <div className="flex lg:flex-col gap-2 lg:justify-end">
+                <Button onClick={applyFilters} className="w-full lg:flex-none justify-center">Apply Filters</Button>
+                <Button onClick={reload} className="w-full lg:flex-none justify-center">Reset</Button>
+              </div>
+            </div>
+
+
+            {/* Secondary Actions */}
+            <div className="flex justify-between items-center pt-4 border-t">
+              <div className="flex gap-2">
+                <Button onClick={() => router.push("/dashboard")}>Back to Dashboard</Button>
+              </div>
+              <Button variant="destructive" onClick={deleteSelected} disabled={selected.length === 0}>
+                Delete Selected ({selected.length})
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+
+
+        {/* Data Table */}
+        <Card>
+          <CardContent className="p-0">
+            <div className="overflow-x-auto">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead className="w-12">Select</TableHead>
+                    <TableHead>ID</TableHead>
+                    <TableHead>Year</TableHead>
+                    <TableHead>Month</TableHead>
+                    <TableHead>Gender</TableHead>
+                    <TableHead>Age</TableHead>
+                    <TableHead>Region</TableHead>
+                    <TableHead>Submission</TableHead>
+                    <TableHead>Approval in Advance</TableHead>
+                    <TableHead>Income</TableHead>
+                    <TableHead>Credit Score</TableHead>
+                    <TableHead>Credit Type</TableHead>
+                    <TableHead>Co-applicant</TableHead>
+                    <TableHead>Credit Worthiness</TableHead>
+                    <TableHead>Open Credit</TableHead>
+                    <TableHead>Loan Type</TableHead>
+                    <TableHead>Loan Purpose</TableHead>
+                    <TableHead>Loan Amount</TableHead>
+                    <TableHead>Term</TableHead>
+                    <TableHead>Rate</TableHead>
+                    <TableHead>Loan Limit</TableHead>
+                    <TableHead>Business</TableHead>
+                    <TableHead>LTV</TableHead>
+                    <TableHead>Secured By</TableHead>
+                    <TableHead>Security Type</TableHead>
+                    <TableHead>Construction</TableHead>
+                    <TableHead>Occupancy</TableHead>
+                    <TableHead>Total Units</TableHead>
+                    <TableHead>Neg Ammortization</TableHead>
+                    <TableHead>Interest Only</TableHead>
+                    <TableHead>Lump Sum</TableHead>
+                    <TableHead>Prediction</TableHead>
+                    <TableHead>Probability</TableHead>
+                  </TableRow>
+                </TableHeader>
+
+
+                <TableBody>
+                  {data.map((loan: any) => (
+                    <TableRow key={loan.id} className="hover:bg-gray-50/50">
+                      <TableCell>
+                        <input
+                          type="checkbox"
+                          checked={selected.includes(loan.id)}
+                          onChange={() => toggleSelect(loan.id)}
+                          className="w-4 h-4 rounded border-gray-300"
+                        />
+                      </TableCell>
+                      <TableCell className="font-medium">{loan.id}</TableCell>
+                      <TableCell>{loan.Year}</TableCell>
+                      <TableCell>{loan.Month}</TableCell>
+                      <TableCell>{loan.Gender}</TableCell>
+                      <TableCell>{loan.age}</TableCell>
+                      <TableCell>{loan.Region}</TableCell>
+                      <TableCell>{loan.submission_of_application}</TableCell>
+                      <TableCell>{loan.approv_in_adv}</TableCell>
+                      <TableCell>{loan.income}</TableCell>
+                      <TableCell>{loan.Credit_Score}</TableCell>
+                      <TableCell>{loan.credit_type}</TableCell>
+                      <TableCell>{loan.co_applicant_credit_type}</TableCell>
+                      <TableCell>{loan.Credit_Worthiness}</TableCell>
+                      <TableCell>{loan.open_credit}</TableCell>
+                      <TableCell>{loan.loan_type}</TableCell>
+                      <TableCell>{loan.loan_purpose}</TableCell>
+                      <TableCell>{loan.loan_amount}</TableCell>
+                      <TableCell>{loan.term}</TableCell>
+                      <TableCell>{loan.rate_of_interest}</TableCell>
+                      <TableCell>{loan.loan_limit}</TableCell>
+                      <TableCell>{loan.business_or_commercial}</TableCell>
+                      <TableCell>{loan.LTV}</TableCell>
+                      <TableCell>{loan.Secured_by}</TableCell>
+                      <TableCell>{loan.Security_Type}</TableCell>
+                      <TableCell>{loan.construction_type}</TableCell>
+                      <TableCell>{loan.occupancy_type}</TableCell>
+                      <TableCell>{loan.total_units}</TableCell>
+                      <TableCell>{loan.Neg_ammortization}</TableCell>
+                      <TableCell>{loan.interest_only}</TableCell>
+                      <TableCell>{loan.lump_sum_payment}</TableCell>
+                      <TableCell>{loan.prediction}</TableCell>
+                      <TableCell>{loan.probability}</TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
+          </CardContent>
+        </Card>
+
+
+        {/*  */}
+        <div className="flex justify-center items-center gap-4 mt-6">
+          <Button
+            className="h-10 px-6 py-2 text-base"
+            disabled={page === 1}
+            onClick={() => setPage(page - 1)}
           >
-            <option value="">Sort ID</option>
-            <option value="asc">ID Asc</option>
-            <option value="desc">ID Desc</option>
-          </select>
-
-          <Button onClick={applyFilters}>Apply Filters</Button>
-          <Button onClick={reload}>Reset</Button>
+            Previous
+          </Button>
+          <span className="text-lg font-medium text-gray-700">Page {page}</span>
+          <Button
+            className="h-10 px-6 py-2 text-base"
+            onClick={() => setPage(page + 1)}
+          >
+            Next
+          </Button>
         </div>
-
-        <div className="flex gap-4">
-          <Button onClick={() => router.push("/dashboard")}>Back</Button>
-          <Button variant="destructive" onClick={deleteSelected}>Delete Selected</Button>
-        </div>
-      </div>
-
-      <div className="overflow-x-auto mt-4">
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>Select</TableHead>
-              <TableHead>ID</TableHead>
-              <TableHead>Year</TableHead>
-              <TableHead>Month</TableHead>
-              <TableHead>Gender</TableHead>
-              <TableHead>Age</TableHead>
-              <TableHead>Region</TableHead>
-              <TableHead>Submission</TableHead>
-              <TableHead>Approval in Advance</TableHead>
-              <TableHead>Income</TableHead>
-              <TableHead>Credit Score</TableHead>
-              <TableHead>Credit Type</TableHead>
-              <TableHead>Co-applicant</TableHead>
-              <TableHead>Credit Worthiness</TableHead>
-              <TableHead>Open Credit</TableHead>
-              <TableHead>Loan Type</TableHead>
-              <TableHead>Loan Purpose</TableHead>
-              <TableHead>Loan Amount</TableHead>
-              <TableHead>Term</TableHead>
-              <TableHead>Rate</TableHead>
-              <TableHead>Loan Limit</TableHead>
-              <TableHead>Business</TableHead>
-              <TableHead>LTV</TableHead>
-              <TableHead>Secured By</TableHead>
-              <TableHead>Security Type</TableHead>
-              <TableHead>Construction</TableHead>
-              <TableHead>Occupancy</TableHead>
-              <TableHead>Total Units</TableHead>
-              <TableHead>Neg Ammortization</TableHead>
-              <TableHead>Interest Only</TableHead>
-              <TableHead>Lump Sum</TableHead>
-              <TableHead>Prediction</TableHead>
-              <TableHead>Probability</TableHead>
-            </TableRow>
-          </TableHeader>
-
-          <TableBody>
-            {data.map((loan: any) => (
-              <TableRow key={loan.id}>
-                <TableCell>
-                  <input
-                    type="checkbox"
-                    checked={selected.includes(loan.id)}
-                    onChange={() => toggleSelect(loan.id)}
-                  />
-                </TableCell>
-                <TableCell>{loan.id}</TableCell>
-                <TableCell>{loan.Year}</TableCell>
-                <TableCell>{loan.Month}</TableCell>
-                <TableCell>{loan.Gender}</TableCell>
-                <TableCell>{loan.age}</TableCell>
-                <TableCell>{loan.Region}</TableCell>
-                <TableCell>{loan.submission_of_application}</TableCell>
-                <TableCell>{loan.approv_in_adv}</TableCell>
-                <TableCell>{loan.income}</TableCell>
-                <TableCell>{loan.Credit_Score}</TableCell>
-                <TableCell>{loan.credit_type}</TableCell>
-                <TableCell>{loan.co_applicant_credit_type}</TableCell>
-                <TableCell>{loan.Credit_Worthiness}</TableCell>
-                <TableCell>{loan.open_credit}</TableCell>
-                <TableCell>{loan.loan_type}</TableCell>
-                <TableCell>{loan.loan_purpose}</TableCell>
-                <TableCell>{loan.loan_amount}</TableCell>
-                <TableCell>{loan.term}</TableCell>
-                <TableCell>{loan.rate_of_interest}</TableCell>
-                <TableCell>{loan.loan_limit}</TableCell>
-                <TableCell>{loan.business_or_commercial}</TableCell>
-                <TableCell>{loan.LTV}</TableCell>
-                <TableCell>{loan.Secured_by}</TableCell>
-                <TableCell>{loan.Security_Type}</TableCell>
-                <TableCell>{loan.construction_type}</TableCell>
-                <TableCell>{loan.occupancy_type}</TableCell>
-                <TableCell>{loan.total_units}</TableCell>
-                <TableCell>{loan.Neg_ammortization}</TableCell>
-                <TableCell>{loan.interest_only}</TableCell>
-                <TableCell>{loan.lump_sum_payment}</TableCell>
-                <TableCell>{loan.prediction}</TableCell>
-                <TableCell>{loan.probability}</TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      </div>
-
-      <div className="flex justify-center gap-4 mt-6">
-        <Button disabled={page === 1} onClick={() => setPage(page - 1)}>Previous</Button>
-        <Button onClick={() => setPage(page + 1)}>Next</Button>
       </div>
     </div>
   );
 }
+
