@@ -360,7 +360,7 @@ def get_empty_data():
         "special_terms": [],
         "occupancy_risk": [],
         "submission_risk": [],
-        "model_accuracy": 93.4,
+        "model_accuracy": 93.40,
     }
 
 

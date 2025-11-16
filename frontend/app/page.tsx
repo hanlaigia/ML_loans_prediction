@@ -236,7 +236,6 @@ export default function LoanPredictFullUI() {
         ...form,
         prediction: result.prediction,
         probability: result.probability,
-        // risk_level: result.riskLevel,
       }
       const res = await fetch(`${apiUrl}/loans/`, {
         method: "POST",

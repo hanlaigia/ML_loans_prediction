@@ -8,13 +8,6 @@ export default function HeatmapMatrix({ matrix, xLabels, yLabels }) {
   const rows = yLabels.length;
 
   const cell = Math.min(w / cols, h / rows);
-
-  // ==========================================
-  // COLOR SCALE (0 → 100%) 
-  // Low (bottom)  = Light Blue
-  // Mid           = White
-  // High (top)    = Dark Blue
-  // ==========================================
   const colorScale = [
     { t: 0.0, color: "#deebf7" },  // light blue
     { t: 0.5, color: "#9ecae1" },  // medium blue

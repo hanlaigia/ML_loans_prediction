@@ -164,10 +164,7 @@ export default function StatisticsDashboard() {
     }
   }, [page]);
 
-
-  // ============================
-  // MAP DATA (SỬA LỖI CHUẨN)
-  // ============================
+  // MAP DATA 
   const data = rawData
     ? {
         total_loans: rawData.kpi?.total_loans ?? 0,
@@ -190,20 +187,14 @@ export default function StatisticsDashboard() {
       }
     : null;
 
-
-  // ==================================
   // UTILS
-  // ==================================
   const formatPercent = (v: any, decimals = 1) =>
     v == null ? "N/A" : `${Number(v).toFixed(decimals)}%`;
 
   const formatCurrency = (v: any) =>
     v == null ? "N/A" : `$${(v / 1_000_000).toFixed(1)}M`;
 
-
-  // ==================================
   // TABLE RENDER
-  // ==================================
   const unitMapping: Record<string, string> = {
     default_rate_percent: "%",
     rate_of_interest: "%",
@@ -232,7 +223,6 @@ export default function StatisticsDashboard() {
 
     if (currentKey === "loanTypeLimit") tableData = data.loan_type;
     if (currentKey === "loanPurpose") tableData = data.loan_purpose;
-    // if (currentKey === "specialTerms") tableData = data.interest_rate;
     if (currentKey === "specialTerms") {
         const src = data.interest_rate;
         tableData = isExpandedSpecialTerms ? src : src.slice(0, 5 );
@@ -251,7 +241,7 @@ export default function StatisticsDashboard() {
       );
     }
 
-    // ====== MAP TÊN CỘT HIỂN THỊ ĐẦY ĐỦ ======
+    // MAP TÊN CỘT HIỂN THỊ ĐẦY ĐỦ 
     const columnNameMap: Record<string, string> = {
       // Demographics
       gender: "Gender",
@@ -336,25 +326,16 @@ export default function StatisticsDashboard() {
       </>
     );
   }; 
-
-
-  // ==================================
   // CHART RENDER 
-  // ==================================
   const renderChart = () => {
     if (!data) return null;
-
-    // Margin dùng chung cho tất cả chart
     const commonMargin = { top: 5, right: 20, bottom: 40, left: 20 };
-
-    // Label trục Y dùng chung
     const commonYAxisLabel = {
       value: "Default Rate (%)",
       angle: -90,
       position: "insideLeft",
-      dy: 40, // căn giữa trên trục Y
+      dy: 40, 
     };
-
     // 1. Gender
     if (activeSection === "demographics" && selectedStat === "genderRisk") {
       return (
@@ -367,26 +348,22 @@ export default function StatisticsDashboard() {
               label={{
                 value: "Gender",
                 position: "bottom",
-                dy: 20, // đẩy chữ xuống giữa dưới trục X
+                dy: 20,
               }}
             />
-
             <YAxis label={commonYAxisLabel} />
-
             <Tooltip />
             <Bar dataKey="default_rate_percent" fill="#3b82f6" />
           </BarChart>
         </ResponsiveContainer>
       );
     }
-
     // 2. Region
     if (activeSection === "demographics" && selectedStat === "regionRisk") {
       return (
         <ResponsiveContainer width="100%" height={300}>
           <BarChart data={data.region} margin={commonMargin}>
             <CartesianGrid strokeDasharray="3 3" />
-
             <XAxis
               dataKey="Region"
               label={{
@@ -395,23 +372,19 @@ export default function StatisticsDashboard() {
                 dy: 20,
               }}
             />
-
             <YAxis label={commonYAxisLabel} />
-
             <Tooltip />
             <Bar dataKey="default_rate_percent" fill="#f97316" />
           </BarChart>
         </ResponsiveContainer>
       );
     }
-
     // 3. Age Group
     if (activeSection === "demographics" && selectedStat === "creditCapacity") {
       return (
         <ResponsiveContainer width="100%" height={300}>
           <BarChart data={data.age_group} margin={commonMargin}>
             <CartesianGrid strokeDasharray="3 3" />
-
             <XAxis
               dataKey="age_group"
               label={{
@@ -420,23 +393,19 @@ export default function StatisticsDashboard() {
                 dy: 20,
               }}
             />
-
             <YAxis label={commonYAxisLabel} />
-
             <Tooltip />
             <Bar dataKey="default_rate_percent" fill="#10b981" />
           </BarChart>
         </ResponsiveContainer>
       );
     }
-
     // Loan Type
     if (activeSection === "loan" && selectedLoanStat === "loanTypeLimit") {
       return (
         <ResponsiveContainer width="100%" height={300}>
           <BarChart data={data.loan_type} margin={commonMargin}>
             <CartesianGrid strokeDasharray="3 3" />
-
             <XAxis
               dataKey="loan_type"
               label={{
@@ -445,23 +414,19 @@ export default function StatisticsDashboard() {
                 dy: 20,
               }}
             />
-
             <YAxis label={commonYAxisLabel} />
-
             <Tooltip />
             <Bar dataKey="default_rate_percent" fill="#8b5cf6" />
           </BarChart>
         </ResponsiveContainer>
       );
     }
-
     // Loan Purpose
     if (activeSection === "loan" && selectedLoanStat === "loanPurpose") {
       return (
         <ResponsiveContainer width="100%" height={300}>
           <BarChart data={data.loan_purpose} margin={commonMargin}>
             <CartesianGrid strokeDasharray="3 3" />
-
             <XAxis
               dataKey="purpose"
               label={{
@@ -470,23 +435,19 @@ export default function StatisticsDashboard() {
                 dy: 20,
               }}
             />
-
             <YAxis label={commonYAxisLabel} />
-
             <Tooltip />
             <Bar dataKey="default_rate_percent" fill="#ef4444" />
           </BarChart>
         </ResponsiveContainer>
       );
     }
-
     // Special Terms (Interest scatter)
     if (activeSection === "loan" && selectedLoanStat === "specialTerms") {
       return (
         <ResponsiveContainer width="100%" height={300}>
           <ScatterChart margin={commonMargin}>
             <CartesianGrid strokeDasharray="3 3" />
-
             <XAxis
               dataKey="rate_of_interest"
               name="Interest Rate"
@@ -496,27 +457,23 @@ export default function StatisticsDashboard() {
                 dy: 20,
               }}
             />
-
             <YAxis
               dataKey="default_rate_percent"
               name="Default Rate"
               label={commonYAxisLabel}
             />
-
             <Tooltip />
             <Scatter data={data.interest_rate} fill="#3b82f6" />
           </ScatterChart>
         </ResponsiveContainer>
       );
     }
-
     // Loan Amount Group
     if (activeSection === "loan" && selectedLoanStat === "loanAmountGroup") {
       return (
         <ResponsiveContainer width="100%" height={300}>
           <BarChart data={data.loan_amount_group} margin={commonMargin}>
             <CartesianGrid strokeDasharray="3 3" />
-
             <XAxis
               dataKey="loan_amount_group"
               label={{
@@ -525,30 +482,23 @@ export default function StatisticsDashboard() {
                 dy: 20,
               }}
             />
-
             <YAxis label={commonYAxisLabel} />
-
             <Tooltip />
             <Bar dataKey="default_rate_percent" fill="#0ea5e9" />
           </BarChart>
         </ResponsiveContainer>
       );
     }
-    // =========================
-    // SIMPLE CLEAN HEATMAP (2×2)
-    // =========================
+    //  HEATMAP
     if (activeSection === "collateral" && selectedCollateralStat === "submissionRisk") {
       const raw = data.submission_method;
-
       if (!raw || raw.length === 0) {
         return <p className="text-center py-4 text-muted-foreground">Không có dữ liệu</p>;
       }
-
       // Trục Y: Submission Method
       const yLabels = ["not_inst", "to_inst"];
       // Trục X: Pre-Approval
       const xLabels = ["nopre", "pre"];
-
       // Build matrix 2×2
       const matrix = [
         [
@@ -560,7 +510,6 @@ export default function StatisticsDashboard() {
           Number(raw.find(r => r.submission === "to_inst" && r.pre_approval === "pre")?.default_rate_percent ?? 0),
         ]
       ];
-
       return (
         <div style={{ width: "100%", marginTop: 20 }}>
           <h3 className="text-lg font-semibold mb-6 text-center">
@@ -593,25 +542,20 @@ export default function StatisticsDashboard() {
                 dy: 20,
               }}
             />
-
             <YAxis label={commonYAxisLabel} />
-
             <Tooltip />
             <Bar dataKey="default_rate_percent" fill="#14b8a6" />
           </BarChart>
         </ResponsiveContainer>
       );
     }
-
     return (
       <div className="py-4 text-center text-muted-foreground">
         Không có dữ liệu
       </div>
     );
   };
-  // ==================================
   // RENDER UI
-  // ==================================
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50">
@@ -622,7 +566,6 @@ export default function StatisticsDashboard() {
       </div>
     );
   }
-
   if (error || !data) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50">
@@ -633,7 +576,6 @@ export default function StatisticsDashboard() {
       </div>
     );
   }
-
   return (
     <div className="min-h-screen bg-transparent">
       <header className="border-b border-border bg-card/100 backdrop-blur-md">
@@ -651,18 +593,15 @@ export default function StatisticsDashboard() {
           </Button>
         </div>
       </header>
-
       <main className="container mx-auto px-4 py-6">
-
         {/* KPI CARDS */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 mb-4">
-
           {[
             { title: "Total Loans", value: data.total_loans?.toLocaleString(), unit: "loans" },
             { title: "Avg Credit Score", value: data.avg_credit_score?.toFixed(2), unit: "points" },
-            { title: "Avg Loan Amount", value: data.avg_loan_amount?.toLocaleString(), unit: "USD" },
+            { title: "Avg Loan Amount", value: Number(data.avg_loan_amount.toFixed(2)).toLocaleString(), unit: "USD" },
             { title: "Default Rate (%)", value: `${data.default_rate_percent?.toFixed(2)}%`, unit: "" },
-            { title: "Model Accuracy (%)", value: `${data.model_accuracy}%`, unit: "" },
+            { title: "Model Accuracy (%)", value: Number(data.model_accuracy).toFixed(2), unit: "%" },
           ].map((item, i) => (
             <Card
               key={i}
@@ -671,7 +610,6 @@ export default function StatisticsDashboard() {
                 minHeight: "100px",      
               }}
             >
-
               {/* TITLE */}
               <div className="absolute top-2 left-1/2 -translate-x-1/2 text-sm font-semibold text-center text-black/60">
                 {item.title}
@@ -685,14 +623,11 @@ export default function StatisticsDashboard() {
               </div>
             </Card>
           ))}
-
         </div>
         {/* MAIN GRID */}
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
-          
+        <div className="grid grid-cols-1 lg:grid-cols-4 gap-6"> 
           {/* LEFT SIDEBAR */}
           <div className="lg:col-span-1 space-y-6">
-            
             {/* Demographics */}
             <Card className="bg-card/100 backdrop-blur-md">
               <CardHeader className="pb-0">
@@ -763,7 +698,6 @@ export default function StatisticsDashboard() {
                 </div>
               </CardContent>
             </Card>
-
             {/* Collateral */}
             <Card className="bg-card/100 backdrop-blur-md">
               <CardHeader className="pb-0">
@@ -778,7 +712,6 @@ export default function StatisticsDashboard() {
                   ].map((stat) => {
                     const isSelected =
                       activeSection === "collateral" && selectedCollateralStat === stat.id;
-
                     return (
                       <Button
                         key={stat.id}
@@ -801,19 +734,15 @@ export default function StatisticsDashboard() {
                 </div>
               </CardContent>
             </Card>
-
           </div>
-
           {/* RIGHT CONTENT */}
           <div className="lg:col-span-3 space-y-4">
-
             {/* TITLE + FILTER */}
             <Card className="bg-card/100 backdrop-blur-md">
               <CardContent className="py-0.5 flex justify-between items-center">
                 <h2 className="text-lg font-semibold text-foreground">
                   Chart & Data
                 </h2>
-
                 <div className="flex gap-2">
                   {/* Filter Button */}
                   <Dialog open={isFilterOpen} onOpenChange={setIsFilterOpen}>
@@ -825,16 +754,13 @@ export default function StatisticsDashboard() {
                           : "Filter by Month/Year"}
                       </Button>
                     </DialogTrigger>
-
                     <DialogContent className="sm:max-w-md">
                       <DialogHeader>
                         <DialogTitle>Filter by Time Period</DialogTitle>
                         <DialogDescription>Select month and year</DialogDescription>
                       </DialogHeader>
-
                       <div className="grid gap-4 py-4">
-                        <div className="grid grid-cols-2 gap-4">
-                          
+                        <div className="grid grid-cols-2 gap-4">                         
                           <div>
                             <label className="text-sm font-medium block mb-2">Year</label>
                             <Select
@@ -851,7 +777,6 @@ export default function StatisticsDashboard() {
                               </SelectContent>
                             </Select>
                           </div>
-
                           <div>
                             <label className="text-sm font-medium block mb-2">Month</label>
                             <Select
@@ -872,7 +797,6 @@ export default function StatisticsDashboard() {
                             </Select>
                           </div>
                         </div>
-
                         {(selectedMonth || selectedYear) && (
                           <Button
                             variant="ghost"
@@ -889,7 +813,6 @@ export default function StatisticsDashboard() {
                       </div>
                     </DialogContent>
                   </Dialog>
-
                   {/* View All Data */}
                   <Button
                     variant="outline"
@@ -899,25 +822,19 @@ export default function StatisticsDashboard() {
                   >
                     View All Data
                   </Button>
-
                 </div>
               </CardContent>
             </Card>
-
             {/* CHART */}
             <Card className="bg-card/100 backdrop-blur-md">
               <CardHeader><CardTitle className="text-base">Chart Visualization</CardTitle></CardHeader>
               <CardContent>{renderChart()}</CardContent>
-            </Card>
-            
+            </Card>           
             {/* TABLE */}
             <Card className="bg-card/100 backdrop-blur-md">
               <CardHeader><CardTitle className="text-base">Data Table</CardTitle></CardHeader>
               <CardContent>{renderTable()}</CardContent>
             </Card>
-
-
-
           </div>
         </div>
       </main>
