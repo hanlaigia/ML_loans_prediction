@@ -1,5 +1,5 @@
 "use client";
-
+import HeatmapMatrix from "@/components/HeatmapMatrix";
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { useRouter } from "next/navigation";
@@ -91,6 +91,8 @@ export default function StatisticsDashboard() {
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   const [allData, setAllData] = useState<any[]>([]);
   const [showAllData, setShowAllData] = useState(false);
+
+  const [isExpandedSpecialTerms, setIsExpandedSpecialTerms] = useState(false);
 
   const [selectedMonth, setSelectedMonth] = useState<number | null>(null);
   const [selectedYear, setSelectedYear] = useState<number | null>(null);
@@ -202,6 +204,16 @@ export default function StatisticsDashboard() {
   // ==================================
   // TABLE RENDER
   // ==================================
+  const unitMapping: Record<string, string> = {
+    default_rate_percent: "%",
+    rate_of_interest: "%",
+    avg_interest_rate: "%",
+    avg_loan_amount: " USD",
+    loan_count: " loans",
+    total_loans: " loans",
+    default_count: " cases",
+  };
+
   const renderTable = () => {
     if (!data) return null;
 
@@ -223,17 +235,7 @@ export default function StatisticsDashboard() {
     // if (currentKey === "specialTerms") tableData = data.interest_rate;
     if (currentKey === "specialTerms") {
         const src = data.interest_rate;
-        const total = src.length;
-
-        if (total > 20) {
-            tableData = [
-                src[0],                                       // min interest
-                ...src.slice(Math.floor(total/2) - 5, Math.floor(total/2) + 5), // middle sample
-                src[total - 1]                                // max interest
-            ];
-        } else {
-            tableData = src;
-        }
+        tableData = isExpandedSpecialTerms ? src : src.slice(0, 5 );
     }
 
     if (currentKey === "loanAmountGroup") tableData = data.loan_amount_group;
@@ -257,20 +259,21 @@ export default function StatisticsDashboard() {
       region: "Region",
       Region: "Region",
       age_group: "Age Group",
-      total_loans: "Total Loans",
-      default_count: "Default Count",
+
+      total_loans: "Total Loans (loans)",
+      default_count: "Default Count (cases)",
       default_rate_percent: "Default Rate (%)",
-      avg_probability: "Avg Probability",
+      avg_probability: "Avg Probability (%)",
       avg_credit_score: "Avg Credit Score",
 
       // Loan characteristics
       loan_type: "Loan Type",
       purpose: "Loan Purpose",
-      loan_count: "Loan Count",
+      loan_count: "Loan Count (loans)",
       rate_of_interest: "Interest Rate (%)",
-      avg_interest_rate: "Avg Interest Rate",
+      avg_interest_rate: "Avg Interest Rate (%)",
       loan_amount_group: "Loan Amount Group",
-      avg_loan_amount: "Avg Loan Amount",
+      avg_loan_amount: "Avg Loan Amount (USD)",
 
       // Collateral & Application
       submission: "Submission Method",
@@ -278,32 +281,61 @@ export default function StatisticsDashboard() {
       pre_approval: "Pre-Approval",
       occupancy_type: "Occupancy Type",
       Secured_by: "Secured By",
-    };
-
+        };
     return (
-      <Table>
-        <TableHeader>
-          <TableRow>
-            {Object.keys(tableData[0]).map((key) => (
-              <TableHead key={key}>
-                {columnNameMap[key] ?? key}
-              </TableHead>
-            ))}
-          </TableRow>
-        </TableHeader>
-
-        <TableBody>
-          {tableData.map((row, idx) => (
-            <TableRow key={idx}>
-              {Object.entries(row).map(([key, value]) => (
-                <TableCell key={key}>{value as any}</TableCell>
+      <>
+        <Table>
+          <TableHeader>
+            <TableRow>
+              {Object.keys(tableData[0]).map((key) => (
+                <TableHead key={key}>
+                  {columnNameMap[key] ?? key}
+                </TableHead>
               ))}
             </TableRow>
-          ))}
-        </TableBody>
-      </Table>
+          </TableHeader>
+
+          <TableBody>
+            {tableData.map((row, idx) => (
+              <TableRow key={idx}>
+                {Object.entries(row).map(([key, value]) => (
+                  <TableCell key={key}>
+                    {(() => {
+                        if (value == null) return "N/A";
+
+                        let num = Number(value);
+                        if (isNaN(num)) return value;
+
+                        if (
+                          key.includes("percent") ||
+                          key.includes("rate") ||
+                          key.includes("probability")
+                        ) {
+                          if (num <= 1) num *= 100;
+                          return num.toFixed(2);
+                        }
+
+                        if (!Number.isInteger(num)) return num.toFixed(2);
+
+                        return num;
+                    })()}
+                  </TableCell>
+                ))}
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+
+        {currentKey === "specialTerms" && (
+          <div className="flex justify-center mt-4">
+            <Button onClick={() => setIsExpandedSpecialTerms(prev => !prev)}>
+              {isExpandedSpecialTerms ? "Show Less" : "Show More"}
+            </Button>
+          </div>
+        )}
+      </>
     );
-  };
+  }; 
 
 
   // ==================================
@@ -312,13 +344,35 @@ export default function StatisticsDashboard() {
   const renderChart = () => {
     if (!data) return null;
 
+    // Margin dùng chung cho tất cả chart
+    const commonMargin = { top: 5, right: 20, bottom: 40, left: 20 };
+
+    // Label trục Y dùng chung
+    const commonYAxisLabel = {
+      value: "Default Rate (%)",
+      angle: -90,
+      position: "insideLeft",
+      dy: 40, // căn giữa trên trục Y
+    };
+
     // 1. Gender
     if (activeSection === "demographics" && selectedStat === "genderRisk") {
       return (
         <ResponsiveContainer width="100%" height={300}>
-          <BarChart data={data.gender}>
-            <XAxis dataKey="Gender" />
-            <YAxis />
+          <BarChart data={data.gender} margin={commonMargin}>
+            <CartesianGrid strokeDasharray="3 3" />
+
+            <XAxis
+              dataKey="Gender"
+              label={{
+                value: "Gender",
+                position: "bottom",
+                dy: 20, // đẩy chữ xuống giữa dưới trục X
+              }}
+            />
+
+            <YAxis label={commonYAxisLabel} />
+
             <Tooltip />
             <Bar dataKey="default_rate_percent" fill="#3b82f6" />
           </BarChart>
@@ -330,9 +384,20 @@ export default function StatisticsDashboard() {
     if (activeSection === "demographics" && selectedStat === "regionRisk") {
       return (
         <ResponsiveContainer width="100%" height={300}>
-          <BarChart data={data.region}>
-            <XAxis dataKey="Region" />
-            <YAxis />
+          <BarChart data={data.region} margin={commonMargin}>
+            <CartesianGrid strokeDasharray="3 3" />
+
+            <XAxis
+              dataKey="Region"
+              label={{
+                value: "Region",
+                position: "bottom",
+                dy: 20,
+              }}
+            />
+
+            <YAxis label={commonYAxisLabel} />
+
             <Tooltip />
             <Bar dataKey="default_rate_percent" fill="#f97316" />
           </BarChart>
@@ -344,9 +409,20 @@ export default function StatisticsDashboard() {
     if (activeSection === "demographics" && selectedStat === "creditCapacity") {
       return (
         <ResponsiveContainer width="100%" height={300}>
-          <BarChart data={data.age_group}>
-            <XAxis dataKey="age_group" />
-            <YAxis />
+          <BarChart data={data.age_group} margin={commonMargin}>
+            <CartesianGrid strokeDasharray="3 3" />
+
+            <XAxis
+              dataKey="age_group"
+              label={{
+                value: "Age Group",
+                position: "bottom",
+                dy: 20,
+              }}
+            />
+
+            <YAxis label={commonYAxisLabel} />
+
             <Tooltip />
             <Bar dataKey="default_rate_percent" fill="#10b981" />
           </BarChart>
@@ -358,9 +434,20 @@ export default function StatisticsDashboard() {
     if (activeSection === "loan" && selectedLoanStat === "loanTypeLimit") {
       return (
         <ResponsiveContainer width="100%" height={300}>
-          <BarChart data={data.loan_type}>
-            <XAxis dataKey="loan_type" />
-            <YAxis />
+          <BarChart data={data.loan_type} margin={commonMargin}>
+            <CartesianGrid strokeDasharray="3 3" />
+
+            <XAxis
+              dataKey="loan_type"
+              label={{
+                value: "Loan Type",
+                position: "bottom",
+                dy: 20,
+              }}
+            />
+
+            <YAxis label={commonYAxisLabel} />
+
             <Tooltip />
             <Bar dataKey="default_rate_percent" fill="#8b5cf6" />
           </BarChart>
@@ -372,9 +459,20 @@ export default function StatisticsDashboard() {
     if (activeSection === "loan" && selectedLoanStat === "loanPurpose") {
       return (
         <ResponsiveContainer width="100%" height={300}>
-          <BarChart data={data.loan_purpose}>
-            <XAxis dataKey="purpose" />
-            <YAxis />
+          <BarChart data={data.loan_purpose} margin={commonMargin}>
+            <CartesianGrid strokeDasharray="3 3" />
+
+            <XAxis
+              dataKey="purpose"
+              label={{
+                value: "Loan Purpose",
+                position: "bottom",
+                dy: 20,
+              }}
+            />
+
+            <YAxis label={commonYAxisLabel} />
+
             <Tooltip />
             <Bar dataKey="default_rate_percent" fill="#ef4444" />
           </BarChart>
@@ -386,9 +484,25 @@ export default function StatisticsDashboard() {
     if (activeSection === "loan" && selectedLoanStat === "specialTerms") {
       return (
         <ResponsiveContainer width="100%" height={300}>
-          <ScatterChart>
-            <XAxis dataKey="rate_of_interest" name="Interest Rate" />
-            <YAxis dataKey="default_rate_percent" name="Default Rate" />
+          <ScatterChart margin={commonMargin}>
+            <CartesianGrid strokeDasharray="3 3" />
+
+            <XAxis
+              dataKey="rate_of_interest"
+              name="Interest Rate"
+              label={{
+                value: "Interest Rate (%)",
+                position: "bottom",
+                dy: 20,
+              }}
+            />
+
+            <YAxis
+              dataKey="default_rate_percent"
+              name="Default Rate"
+              label={commonYAxisLabel}
+            />
+
             <Tooltip />
             <Scatter data={data.interest_rate} fill="#3b82f6" />
           </ScatterChart>
@@ -400,38 +514,88 @@ export default function StatisticsDashboard() {
     if (activeSection === "loan" && selectedLoanStat === "loanAmountGroup") {
       return (
         <ResponsiveContainer width="100%" height={300}>
-          <BarChart data={data.loan_amount_group}>
-            <XAxis dataKey="loan_amount_group" />
-            <YAxis />
+          <BarChart data={data.loan_amount_group} margin={commonMargin}>
+            <CartesianGrid strokeDasharray="3 3" />
+
+            <XAxis
+              dataKey="loan_amount_group"
+              label={{
+                value: "Loan Amount Group",
+                position: "bottom",
+                dy: 20,
+              }}
+            />
+
+            <YAxis label={commonYAxisLabel} />
+
             <Tooltip />
             <Bar dataKey="default_rate_percent" fill="#0ea5e9" />
           </BarChart>
         </ResponsiveContainer>
       );
     }
-
-    // Submission Method
+    // =========================
+    // SIMPLE CLEAN HEATMAP (2×2)
+    // =========================
     if (activeSection === "collateral" && selectedCollateralStat === "submissionRisk") {
-      return (
-        <ResponsiveContainer width="100%" height={300}>
-          <BarChart data={data.submission_method}>
-            <XAxis dataKey="submission" />
-            <YAxis />
-            <Tooltip />
-            <Bar dataKey="default_rate_percent" fill="#f97316" />
-          </BarChart>
+      const raw = data.submission_method;
 
-        </ResponsiveContainer>
+      if (!raw || raw.length === 0) {
+        return <p className="text-center py-4 text-muted-foreground">Không có dữ liệu</p>;
+      }
+
+      // Trục Y: Submission Method
+      const yLabels = ["not_inst", "to_inst"];
+      // Trục X: Pre-Approval
+      const xLabels = ["nopre", "pre"];
+
+      // Build matrix 2×2
+      const matrix = [
+        [
+          Number(raw.find(r => r.submission === "not_inst" && r.pre_approval === "nopre")?.default_rate_percent ?? 0),
+          Number(raw.find(r => r.submission === "not_inst" && r.pre_approval === "pre")?.default_rate_percent ?? 0),
+        ],
+        [
+          Number(raw.find(r => r.submission === "to_inst" && r.pre_approval === "nopre")?.default_rate_percent ?? 0),
+          Number(raw.find(r => r.submission === "to_inst" && r.pre_approval === "pre")?.default_rate_percent ?? 0),
+        ]
+      ];
+
+      return (
+        <div style={{ width: "100%", marginTop: 20 }}>
+          <h3 className="text-lg font-semibold mb-6 text-center">
+            Risk by Submission Method (Heatmap)
+          </h3>
+
+          {/* dùng HeatmapMatrix component */}
+          <div style={{ display: "flex", justifyContent: "center" }}>
+            <HeatmapMatrix
+              matrix={matrix}
+              xLabels={xLabels}
+              yLabels={yLabels}
+            />
+          </div>
+        </div>
       );
     }
-
     // Occupancy Type
     if (activeSection === "collateral" && selectedCollateralStat === "occupancyRisk") {
       return (
         <ResponsiveContainer width="100%" height={300}>
-          <BarChart data={data.occupancy_type}>
-            <XAxis dataKey="occupancy_type" />
-            <YAxis />
+          <BarChart data={data.occupancy_type} margin={commonMargin}>
+            <CartesianGrid strokeDasharray="3 3" />
+
+            <XAxis
+              dataKey="occupancy_type"
+              label={{
+                value: "Occupancy Type",
+                position: "bottom",
+                dy: 20,
+              }}
+            />
+
+            <YAxis label={commonYAxisLabel} />
+
             <Tooltip />
             <Bar dataKey="default_rate_percent" fill="#14b8a6" />
           </BarChart>
@@ -439,10 +603,12 @@ export default function StatisticsDashboard() {
       );
     }
 
-    return <div className="py-4 text-center text-muted-foreground">Không có dữ liệu</div>;
+    return (
+      <div className="py-4 text-center text-muted-foreground">
+        Không có dữ liệu
+      </div>
+    );
   };
-
-
   // ==================================
   // RENDER UI
   // ==================================
@@ -493,8 +659,8 @@ export default function StatisticsDashboard() {
 
           {[
             { title: "Total Loans", value: data.total_loans?.toLocaleString(), unit: "loans" },
-            { title: "Avg Credit Score", value: data.avg_credit_score?.toFixed(2), unit: "pts" },
-            { title: "Avg Loan Amount", value: data.avg_loan_amount?.toLocaleString(), unit: "$" },
+            { title: "Avg Credit Score", value: data.avg_credit_score?.toFixed(2), unit: "points" },
+            { title: "Avg Loan Amount", value: data.avg_loan_amount?.toLocaleString(), unit: "USD" },
             { title: "Default Rate (%)", value: `${data.default_rate_percent?.toFixed(2)}%`, unit: "" },
             { title: "Model Accuracy (%)", value: `${data.model_accuracy}%`, unit: "" },
           ].map((item, i) => (
@@ -507,18 +673,16 @@ export default function StatisticsDashboard() {
             >
 
               {/* TITLE */}
-              <div className="absolute top-2 left-1/2 -translate-x-1/2 text-sm font-semibold text-center">
+              <div className="absolute top-2 left-1/2 -translate-x-1/2 text-sm font-semibold text-center text-black/60">
                 {item.title}
               </div>
-
               {/* NUMBER + UNIT */}
-              <div className="text-center mt-3">
-                <span className="text-3xl font-bold">{item.value}</span>
+              <div className="text-center mt-3 text-blue-600 font-bold">
+                <span className="text-3xl">{item.value}</span>
                 {item.unit && (
-                  <span className="text-2xl font-bold ml-1">{item.unit}</span>
+                  <span className="text-2xl ml-1">{item.unit}</span>
                 )}
               </div>
-
             </Card>
           ))}
 
