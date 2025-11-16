@@ -3,10 +3,8 @@ from collections import defaultdict
 import traceback
 from datetime import datetime
 from sqlalchemy import text
-
 import models
 import schemas
-
 
 def create_loan(db: Session, loan: schemas.LoanCreate):
     try:
@@ -28,14 +26,12 @@ def create_loan(db: Session, loan: schemas.LoanCreate):
             filtered_data["Gender"] = "Female"
         else:
             filtered_data["Gender"] = "Sex Not Av"
-
     # Ghi nhận Month/Year hiện tại vào CSDL
     filtered_data["Month"] = datetime.now().strftime("%B")
     filtered_data["Year"] = datetime.now().year
     # Ghi nhận Month/Year hiện tại vào CSDL
     filtered_data["Month"] = datetime.now().strftime("%B")  # VD: "September"
     filtered_data["Year"] = datetime.now().year
-
     # Chuẩn hóa loan_limit
     if "loan_limit" in filtered_data:
         v = filtered_data["loan_limit"]
@@ -71,26 +67,21 @@ from typing import Optional
 
 def get_dashboard_data(db: Session, month: Optional[str] = None, year: Optional[int] = None):
     data = {}
-
-    # -------------------------
     # 0. WHERE DYNAMIC (FILTER)
-    # -------------------------
     conditions = ["1=1"]
     params = {}
 
     if month:
         conditions.append("Month = :month")
-        params["month"] = month   # VD: "October"
+        params["month"] = month   
 
     if year:
         conditions.append("Year = :year")
-        params["year"] = year     # VD: 2025
+        params["year"] = year  
 
     where_clause = " AND ".join(conditions)
 
-    # -------------------------
     # I. KPI DASHBOARD
-    # -------------------------
     kpi = {}
 
     # 1. Total Loans
@@ -134,9 +125,8 @@ def get_dashboard_data(db: Session, month: Optional[str] = None, year: Optional[
 
     data["kpi"] = kpi
 
-    # -------------------------
     # II. DEMOGRAPHICS
-    # -------------------------
+
     data["demographics"] = {}
 
     # 2.1 Gender
@@ -362,7 +352,6 @@ def get_empty_data():
         "submission_risk": [],
         "model_accuracy": 93.40,
     }
-
 
 def get_user_by_username(db: Session, username: str):
     return db.query(models.Employee).filter(models.Employee.username == username).first()

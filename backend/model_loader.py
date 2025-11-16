@@ -4,10 +4,8 @@ import numpy as np
 import os
 import os
 
-
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 MODEL_PATH = os.path.join(BASE_DIR, "models", "xgboost_model.pkl")
-
 
 print("Model loading from:", MODEL_PATH)
 model = joblib.load(MODEL_PATH)

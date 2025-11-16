@@ -226,7 +226,6 @@ export default function LoanPredictFullUI() {
       setPredicting(false)
     }
   }
-
 // ----------------- Save -------------
   const handleSave = async () => {
     if (!result) return alert("Please predict first!")

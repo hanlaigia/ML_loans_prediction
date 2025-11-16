@@ -38,8 +38,6 @@ class Loan(Base):
     prediction = Column(Integer, nullable=True)
     probability = Column(Float, nullable=True)
 
-# Employee Model for Login
-
 class Employee(Base):
     __tablename__ = "employees"
 

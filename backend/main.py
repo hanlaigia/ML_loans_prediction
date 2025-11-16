@@ -11,9 +11,6 @@ import models
 import crud
 from fastapi.responses import RedirectResponse
 
-
-
-
 Base.metadata.create_all(bind=engine)
 
 app = FastAPI(title="Loan Prediction API", version="1.1")

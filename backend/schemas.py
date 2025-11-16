@@ -1,7 +1,6 @@
 from pydantic import BaseModel
 from typing import Optional
 
-
 class LoanBase(BaseModel):
     loan_limit: Optional[str] = None
     Gender: Optional[str] = None
