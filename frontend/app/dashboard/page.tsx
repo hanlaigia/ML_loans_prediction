@@ -638,7 +638,7 @@ export default function StatisticsDashboard() {
                   {[
                     { id: "genderRisk", number: "1", label: "Risk Distribution by Gender" },
                     { id: "regionRisk", number: "2", label: "Risk Allocation by Region" },
-                    { id: "creditCapacity", number: "3", label: "Credit Capacity Distribution" },
+                    { id: "creditCapacity", number: "3", label: "Risk Distribution by Age Group" },
                   ].map((stat) => {
                     const isSelected = activeSection === "demographics" && selectedStat === stat.id;
                     return (
@@ -671,9 +671,9 @@ export default function StatisticsDashboard() {
               <CardContent className="pt-0 mt-[-4px]">
                 <div className="space-y-1">
                   {[
-                    { id: "loanTypeLimit", number: "1", label: "Risk by Loan Limit and Type" },
+                    { id: "loanTypeLimit", number: "1", label: "Risk Distribution by Loan Type" },
                     { id: "loanPurpose", number: "2", label: "Risk by Loan Purpose" },
-                    { id: "specialTerms", number: "3", label: "Impact of Special Terms" },
+                    { id: "specialTerms", number: "3", label: "Risk Correlation by Interest Rate" },
                     { id: "loanAmountGroup", number: "4", label: "Loan Amount Group" },
                   ].map((stat) => {
                     const isSelected = activeSection === "loan" && selectedLoanStat === stat.id;

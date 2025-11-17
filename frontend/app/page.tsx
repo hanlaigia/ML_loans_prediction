@@ -705,7 +705,7 @@ export default function LoanPredictFullUI() {
                           <Input
                             id="term"
                             type="number"
-                            placeholder="e.g. 360"
+                            placeholder="e.g. 36"
                             value={form.term || ""}
                             onChange={(e) =>
                               handleChange("term", Number(e.target.value) || 0)
