@@ -44,7 +44,7 @@ CREATE TABLE `employees` (
 
 LOCK TABLES `employees` WRITE;
 /*!40000 ALTER TABLE `employees` DISABLE KEYS */;
-INSERT INTO `employees` VALUES (6,'NV001','admin01','123456','Alice Johnson','alice.johnson@company.com','0901234567','admin','2025-11-11 10:00:20'),(7,'NV002','staff01','123456','Bob Williams','bob.williams@company.com','0902345678','staff','2025-11-11 10:00:20'),(8,'NV003','staff02','123456','Charlie Evans','charlie.evans@company.com','0903456789','staff','2025-11-11 10:00:20'),(9,'NV004','manager01','123456','David Brown','david.brown@company.com','0904567890','manager','2025-11-11 10:00:20'),(10,'NV005','assistant01','123456','Emily Davis','emily.davis@company.com','0905678901','assistant','2025-11-11 10:00:20');
+INSERT INTO `employees` VALUES (6,'NV001','admin01','123456','Alice Johnson','alice.johnson@company.com','0901234567','admin','2025-11-11 10:00:20'),(7,'NV002','staff01','456123','Bob Williams','bob.williams@company.com','0902345678','staff','2025-11-11 10:00:20'),(8,'NV003','staff02','abc456','Charlie Evans','charlie.evans@company.com','0903456789','staff','2025-11-11 10:00:20'),(9,'NV004','manager01','abc45','David Brown','david.brown@company.com','0904567890','manager','2025-11-11 10:00:20'),(10,'NV005','assistant01','abcd45','Emily Davis','emily.davis@company.com','0905678901','assistant','2025-11-11 10:00:20');
 /*!40000 ALTER TABLE `employees` ENABLE KEYS */;
 UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
@@ -57,4 +57,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2025-11-17 22:06:07
+-- Dump completed on 2025-11-17 22:14:16
