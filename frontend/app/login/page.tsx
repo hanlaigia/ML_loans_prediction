@@ -50,13 +50,18 @@ export default function LoginPage() {
       }
 
       const data = await res.json();
-
       if (typeof window !== "undefined") {
+        // Client local storage
         localStorage.setItem("isLoggedIn", "true");
         localStorage.setItem("user", JSON.stringify(data.user));
-        if (remember) localStorage.setItem("remember", "true");
-      }
 
+        if (remember) {
+          localStorage.setItem("remember", "true");
+        }
+
+        // Server cookie for middleware
+        document.cookie = "isLoggedIn=true; path=/; max-age=86400; SameSite=Lax";
+      }
       router.replace("/");
     } catch (err) {
       setError("Server error");

@@ -118,14 +118,6 @@ const ageValueToGroup = (value: number): string => {
 export default function LoanPredictFullUI() {
   const router = useRouter()
 
-  useEffect(() => {
-    const isLoggedIn = localStorage.getItem("isLoggedIn")
-    if (!isLoggedIn) {
-      router.replace("/login")
-    }
-  }, [])
-
-//  NEW: Fetch Dashboard Data
   const [dashboardData, setDashboardData] = useState<any>(null)
 
   useEffect(() => {
@@ -287,9 +279,17 @@ export default function LoanPredictFullUI() {
   }
 
   const handleLogout = () => {
-    localStorage.clear()
-    router.push("/login")
-  }
+    // Xóa cookie đăng nhập
+    document.cookie = "isLoggedIn=; Path=/; Max-Age=0; SameSite=Lax";
+
+    // Xóa localStorage nếu có dùng
+    localStorage.removeItem("isLoggedIn");
+    localStorage.removeItem("user");
+
+    // Redirect về trang login
+    window.location.href = "/login";
+  };
+
 
   // ------------------- Render -------------------
   return (

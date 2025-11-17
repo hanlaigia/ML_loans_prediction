@@ -1,7 +1,15 @@
 "use client";
 import React from "react";
 
-export default function HeatmapMatrix({ matrix, xLabels, yLabels }) {
+export default function HeatmapMatrix({
+  matrix,
+  xLabels,
+  yLabels,
+}: {
+  matrix: number[][];
+  xLabels: string[];
+  yLabels: string[];
+}) {
   const w = 360;
   const h = 360;
   const cols = xLabels.length;
@@ -9,17 +17,13 @@ export default function HeatmapMatrix({ matrix, xLabels, yLabels }) {
 
   const cell = Math.min(w / cols, h / rows);
   const colorScale = [
-    { t: 0.0, color: "#deebf7" },  // light blue
-    { t: 0.5, color: "#9ecae1" },  // medium blue
-    { t: 1.0, color: "#08519c" },  // dark blue
+    { t: 0.0, color: "#deebf7" },
+    { t: 0.5, color: "#9ecae1" },
+    { t: 1.0, color: "#08519c" },
   ];
 
-  // Legend fixed range 0 → 100
-  const LEGEND_MIN = 0;
-  const LEGEND_MAX = 100;
   const ticks = [0, 20, 40, 60, 80, 100];
 
-  // Convert HEX → RGB
   const hexToRgb = (hex: string) => {
     const num = parseInt(hex.replace("#", ""), 16);
     return {
@@ -29,29 +33,27 @@ export default function HeatmapMatrix({ matrix, xLabels, yLabels }) {
     };
   };
 
-  // Linear interpolation between two colors
   const interpolateColor = (c1: string, c2: string, t: number) => {
     const a = hexToRgb(c1);
     const b = hexToRgb(c2);
-    const r = Math.round(a.r + (b.r - a.r) * t);
-    const g = Math.round(a.g + (b.g - a.g) * t);
-    const b2 = Math.round(a.b + (b.b - a.b) * t);
-    return `rgb(${r}, ${g}, ${b2})`;
+    return `rgb(
+      ${Math.round(a.r + (b.r - a.r) * t)},
+      ${Math.round(a.g + (b.g - a.g) * t)},
+      ${Math.round(a.b + (b.b - a.b) * t)}
+    )`;
   };
 
   const getColor = (value: number) => {
-    const t = value / 100; // normalize 0 → 1
+    const t = value / 100;
 
-    if (t <= 0.5) {
+    if (t <= 0.5)
       return interpolateColor(colorScale[0].color, colorScale[1].color, t / 0.5);
-    } else {
-      return interpolateColor(colorScale[1].color, colorScale[2].color, (t - 0.5) / 0.5);
-    }
+
+    return interpolateColor(colorScale[1].color, colorScale[2].color, (t - 0.5) / 0.5);
   };
 
   return (
     <div style={{ display: "flex", justifyContent: "center", gap: 40 }}>
-      {/* HEATMAP SVG */}
       <svg width={w + 120} height={h + 80}>
         {/* Y LABELS */}
         {yLabels.map((lbl, i) => (
@@ -89,10 +91,11 @@ export default function HeatmapMatrix({ matrix, xLabels, yLabels }) {
                 y={y * cell}
                 width={cell}
                 height={cell}
-                fill={getColor(value)}
+                fill={getColor(Number(value))}
                 stroke="#fff"
                 rx={14}
               />
+
               <text
                 x={60 + x * cell + cell / 2}
                 y={y * cell + cell / 2 + 6}
@@ -101,7 +104,7 @@ export default function HeatmapMatrix({ matrix, xLabels, yLabels }) {
                 textAnchor="middle"
                 fill="#000"
               >
-                {value.toFixed(2)}%
+                {Number(value).toFixed(2)}%
               </text>
             </g>
           ))
@@ -110,7 +113,6 @@ export default function HeatmapMatrix({ matrix, xLabels, yLabels }) {
 
       {/* LEGEND */}
       <div style={{ position: "relative" }}>
-        {/* Vertical gradient bar */}
         <div
           style={{
             width: 30,
@@ -118,11 +120,9 @@ export default function HeatmapMatrix({ matrix, xLabels, yLabels }) {
             background: `linear-gradient(to top, ${colorScale[0].color}, ${colorScale[1].color}, ${colorScale[2].color})`,
             borderRadius: 6,
             border: "1px solid #ccc",
-            position: "relative",
           }}
         />
 
-        {/* Ticks and labels */}
         {ticks.map((t, i) => (
           <div
             key={i}

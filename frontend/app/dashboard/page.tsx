@@ -294,8 +294,7 @@ export default function StatisticsDashboard() {
                         if (value == null) return "N/A";
 
                         let num = Number(value);
-                        if (isNaN(num)) return value;
-
+                        if (Number.isNaN(num)) return String(value);
                         if (
                           key.includes("percent") ||
                           key.includes("rate") ||
@@ -502,12 +501,12 @@ export default function StatisticsDashboard() {
       // Build matrix 2×2
       const matrix = [
         [
-          Number(raw.find(r => r.submission === "not_inst" && r.pre_approval === "nopre")?.default_rate_percent ?? 0),
-          Number(raw.find(r => r.submission === "not_inst" && r.pre_approval === "pre")?.default_rate_percent ?? 0),
+          Number(raw.find((item: any) => item.submission === "not_inst" && item.pre_approval === "nopre")?.default_rate_percent ?? 0),
+          Number(raw.find((item: any) => item.submission === "not_inst" && item.pre_approval === "pre")?.default_rate_percent ?? 0),
         ],
         [
-          Number(raw.find(r => r.submission === "to_inst" && r.pre_approval === "nopre")?.default_rate_percent ?? 0),
-          Number(raw.find(r => r.submission === "to_inst" && r.pre_approval === "pre")?.default_rate_percent ?? 0),
+          Number(raw.find((item: any) => item.submission === "to_inst" && item.pre_approval === "nopre")?.default_rate_percent ?? 0),
+          Number(raw.find((item: any) => item.submission === "to_inst" && item.pre_approval === "pre")?.default_rate_percent ?? 0),
         ]
       ];
       return (
